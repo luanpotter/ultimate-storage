@@ -13,6 +13,6 @@ class ModItemModelProvider(
         val itemGenerated = getExistingFile(mcLoc("item/generated"))
         getBuilder("base_upgrade").parent(itemGenerated).texture("layer0", "item/base_upgrade")
 
-        withExistingParent("base_chest", modLoc("block/base_chest"))
+        // withExistingParent("base_chest", modLoc("block/base_chest"))
     }
 }
