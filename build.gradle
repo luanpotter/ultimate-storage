@@ -55,8 +55,10 @@ minecraft {
 
             property 'forge.logging.console.level', 'debug'
 
-            args '--mod', 'ultimatestorage', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources')
-
+            args '--mod', 'ultimatestorage', '--all',
+                    '--existing', file('src/main/resources').toString(),
+                    '--existing', file('src/generated/resources').toString(),
+                    '--output', file('src/generated/resources/')
             mods {
                 ultimatestorage {
                     source sourceSets.main

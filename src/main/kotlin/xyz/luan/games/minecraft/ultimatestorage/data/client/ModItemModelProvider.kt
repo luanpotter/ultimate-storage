@@ -10,9 +10,9 @@ class ModItemModelProvider(
     existingFileHelper: ExistingFileHelper,
 ) : ItemModelProvider(generator, MOD_ID, existingFileHelper) {
     override fun registerModels() {
-        withExistingParent("base_chest", modLoc("block/base_ochest"))
-
         val itemGenerated = getExistingFile(mcLoc("item/generated"))
-        getBuilder("base_upgrade").parent(itemGenerated).texture("layer0", "item/basxe_upgrade")
+        getBuilder("base_upgrade").parent(itemGenerated).texture("layer0", "item/base_upgrade")
+
+        withExistingParent("base_chest", modLoc("block/base_chest"))
     }
 }
