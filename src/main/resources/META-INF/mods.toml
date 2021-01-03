@@ -1,0 +1,27 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[1.6,)"
+license = 'MIT'
+
+[[mods]]
+modId = "ultimatestorage"
+version = "${file.jarVersion}"
+displayName = "Ultimate Storage"
+authors = "Luan Nico"
+description = '''
+    Ultimate Storage adds all the chests, crates and barrels you will ever need.
+    Fully upgradrable, filterable, expandable.
+    Filter your chests, not your pipes.
+    '''
+
+[[dependencies.ultimatestorage]]
+modId = "forge"
+mandatory = true
+versionRange = "[31.2,)"
+ordering = "NONE"
+side = "BOTH"
+[[dependencies.ultimatestorage]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.16.3]"
+ordering = "NONE"
+side = "BOTH"
