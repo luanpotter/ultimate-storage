@@ -1,12 +1,17 @@
 package xyz.luan.games.minecraft.ultimatestorage
 
-import net.minecraftforge.common.MinecraftForge
+import net.minecraft.client.gui.ScreenManager
+import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.MOD_ID
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.registry.ItemRegistry
+import xyz.luan.games.minecraft.ultimatestorage.screens.BaseChestScreen
+
 
 @Mod(MOD_ID)
 object UltimateStorageMod {
@@ -18,6 +23,11 @@ object UltimateStorageMod {
         ItemRegistry.register()
         BlockRegistry.register()
 
-        MinecraftForge.EVENT_BUS.register(this)
+        EVENT_BUS.register(this)
+        MOD_BUS.addListener(::onClientSetup)
+    }
+
+    private fun onClientSetup(event: FMLClientSetupEvent) {
+        ScreenManager.registerFactory(BlockRegistry.baseChestContainer.get(), ::BaseChestScreen)
     }
 }

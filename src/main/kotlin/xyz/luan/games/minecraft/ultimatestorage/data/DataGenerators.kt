@@ -7,6 +7,8 @@ import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.LOGGER
 import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.MOD_ID
 import xyz.luan.games.minecraft.ultimatestorage.data.client.ModBlockStateProvider
 import xyz.luan.games.minecraft.ultimatestorage.data.client.ModItemModelProvider
+import xyz.luan.games.minecraft.ultimatestorage.data.server.ModLootTableProvider
+import xyz.luan.games.minecraft.ultimatestorage.data.server.ModRecipeProvider
 
 @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 object DataGenerators {
@@ -17,7 +19,14 @@ object DataGenerators {
         val gen = event.generator
         val existingFileHelper = event.existingFileHelper
 
-        gen.addProvider(ModBlockStateProvider(gen, existingFileHelper))
-        gen.addProvider(ModItemModelProvider(gen, existingFileHelper))
+        if (event.includeServer()) {
+            gen.addProvider(ModRecipeProvider(gen))
+            gen.addProvider(ModLootTableProvider(gen))
+        }
+
+        if (event.includeClient()) {
+            gen.addProvider(ModBlockStateProvider(gen, existingFileHelper))
+            gen.addProvider(ModItemModelProvider(gen, existingFileHelper))
+        }
     }
 }
