@@ -36,6 +36,7 @@ object BlockRegistry {
     }
 
     val baseChest = addBlock("base_chest") { BaseChestBlock() }
+
     val baseChestTileEntity: RegistryObject<TileEntityType<BaseChestTileEntity>> =
         tileEntities.register("base_chest_tile") {
             TileEntityType.Builder.create(

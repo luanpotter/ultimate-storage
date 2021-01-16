@@ -1,5 +1,6 @@
 package xyz.luan.games.minecraft.ultimatestorage.data.client
 
+import net.minecraft.client.renderer.model.ModelRenderer
 import net.minecraft.data.DataGenerator
 import net.minecraftforge.client.model.generators.ItemModelProvider
 import net.minecraftforge.common.data.ExistingFileHelper
@@ -13,6 +14,6 @@ class ModItemModelProvider(
         val itemGenerated = getExistingFile(mcLoc("item/generated"))
         getBuilder("base_upgrade").parent(itemGenerated).texture("layer0", "item/base_upgrade")
 
-        // withExistingParent("base_chest", modLoc("block/base_chest"))
+        withExistingParent("base_chest", modLoc("block/base_chest"))
     }
 }
