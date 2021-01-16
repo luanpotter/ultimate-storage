@@ -9,7 +9,7 @@ import net.minecraft.util.text.ITextComponent
 import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.MOD_ID
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestContainer
 
-private val background by lazy { ResourceLocation(MOD_ID, "textures/gui/coppercontainer.png") }
+private val background by lazy { ResourceLocation(MOD_ID, "textures/gui/sample-container.png") }
 
 class BaseChestScreen(
     container: BaseChestContainer,

@@ -2,33 +2,29 @@ package xyz.luan.games.minecraft.ultimatestorage.containers
 
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.container.Container
 import net.minecraft.inventory.container.Slot
 import net.minecraft.network.PacketBuffer
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 
-
-class BaseChestContainer : Container {
-    private val rows = 10
+class BaseChestContainer constructor(
+    windowId: Int,
+    private var tile: BaseChestTileEntity,
+    playerInventory: PlayerInventory,
+) : Container(BlockRegistry.baseChestContainer.get(), windowId) {
+    private val rows = 5
     private val cols = 10
-    private var tile: BaseChestTileEntity
+
+    init {
+        setup(playerInventory)
+    }
 
     constructor(windowId: Int, playerInventory: PlayerInventory, extraData: PacketBuffer) : this(
         windowId,
         playerInventory.player.world.getTileEntity(extraData.readBlockPos()) as BaseChestTileEntity,
         playerInventory,
     )
-
-    constructor(
-        windowId: Int,
-        tile: BaseChestTileEntity,
-        playerInventory: PlayerInventory,
-    ) : super(BlockRegistry.baseChestContainer.get(), windowId) {
-        this.tile = tile
-        this.setup(playerInventory);
-    }
 
     private fun setup(inventory: PlayerInventory) {
         // Slots for the hotbar
