@@ -31,7 +31,8 @@ class ModLootTableProvider(generator: DataGenerator) : LootTableProvider(generat
                 .rolls(ConstantRange.of(1))
                 .acceptCondition(SurvivesExplosion.builder())
                 .addEntry(
-                    ItemLootEntry.builder(BlockRegistry.baseChest.get())
+                    ItemLootEntry
+                        .builder(BlockRegistry.baseChest.get())
                         .acceptFunction(CopyName.builder(CopyName.Source.BLOCK_ENTITY))
                 )
             this.registerLootTable(BlockRegistry.baseChest.get(), LootTable.builder().addLootPool(builder))

@@ -14,9 +14,13 @@ class ModBlockStateProvider(
     override fun registerStatesAndModels() {
         horizontalBlock(
             BlockRegistry.baseChest.get(),
-            modLoc("block/wood-chest-side"),
-            modLoc("block/wood-chest-front"),
-            modLoc("block/wood-chest-top"),
+            models().orientableWithBottom(
+                BlockRegistry.baseChest.get().registryName!!.path,
+                modLoc("block/wood-chest-side"),
+                modLoc("block/wood-chest-front"),
+                modLoc("block/wood-chest-bottom"),
+                modLoc("block/wood-chest-top"),
+            ).texture("particle", modLoc("block/wood-chest-side")),
         )
     }
 }

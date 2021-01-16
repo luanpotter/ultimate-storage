@@ -17,7 +17,7 @@ class ModRecipeProvider(generator: DataGenerator) : RecipeProvider(generator) {
             .key('P', Items.STICKY_PISTON)
             .key('C', Items.CHEST)
             .key('R', Items.REDSTONE)
-            .addCriterion("has_diamonds", hasItem(Tags.Items.CHESTS))
+            .addCriterion("has_chests", hasItem(Tags.Items.CHESTS))
             .build(consumer)
     }
 

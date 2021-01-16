@@ -1,9 +1,6 @@
 package xyz.luan.games.minecraft.ultimatestorage.blocks
 
-import net.minecraft.block.Block
-import net.minecraft.block.BlockState
-import net.minecraft.block.ContainerBlock
-import net.minecraft.block.SoundType
+import net.minecraft.block.*
 import net.minecraft.block.material.Material
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.ServerPlayerEntity
@@ -27,10 +24,14 @@ class BaseChestBlock : ContainerBlock(
         .create(Material.WOOD)
         .harvestTool(ToolType.AXE)
         .sound(SoundType.WOOD)
-        .hardnessAndResistance(2F, 10F),
+        .hardnessAndResistance(2F, 10F)
 ) {
     init {
         defaultState = stateContainer.baseState.with(HORIZONTAL_FACING, Direction.NORTH)
+    }
+
+    override fun getRenderType(state: BlockState): BlockRenderType {
+        return BlockRenderType.MODEL
     }
 
     override fun fillStateContainer(builder: StateContainer.Builder<Block, BlockState>) {
@@ -72,7 +73,7 @@ class BaseChestBlock : ContainerBlock(
         return state.with(HORIZONTAL_FACING, direction.rotate(state.get(HORIZONTAL_FACING)))
     }
 
-    override fun getStateForPlacement(context: BlockItemUseContext): BlockState? {
+    override fun getStateForPlacement(context: BlockItemUseContext): BlockState {
         return defaultState.with(HORIZONTAL_FACING, context.placementHorizontalFacing.opposite)
     }
 }
