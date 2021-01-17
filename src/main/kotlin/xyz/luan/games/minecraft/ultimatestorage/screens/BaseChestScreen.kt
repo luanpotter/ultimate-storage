@@ -21,8 +21,8 @@ class BaseChestScreen(
     playerInventory: PlayerInventory,
     title: ITextComponent,
 ) : ContainerScreen<BaseChestContainer>(container, playerInventory, title) {
-    private val rows = container.rows
-
+    private val rows: Int
+        get() = container.rows
     private val middleRows: Int
         get() = rows - 2
 
