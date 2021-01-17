@@ -13,7 +13,10 @@ import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 
 
 class BaseChestTileEntity : TileEntity(BlockRegistry.baseChestTileEntity.get()), INamedContainerProvider {
-    val chestInventory = Inventory(100)
+    val rows = 5
+    val cols = 9
+
+    val chestInventory = Inventory(rows * cols)
 
     override fun createMenu(windowId: Int, playerInventory: PlayerInventory, playerEntity: PlayerEntity?): Container {
         return BaseChestContainer(windowId, this, playerInventory)

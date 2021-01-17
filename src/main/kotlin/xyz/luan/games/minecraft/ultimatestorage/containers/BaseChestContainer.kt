@@ -8,13 +8,16 @@ import net.minecraft.network.PacketBuffer
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 
+private const val playerInvRows = 3
+private const val playerInvCols = 9
+
 class BaseChestContainer constructor(
     windowId: Int,
     private var tile: BaseChestTileEntity,
     playerInventory: PlayerInventory,
 ) : Container(BlockRegistry.baseChestContainer.get(), windowId) {
-    private val rows = 5
-    private val cols = 10
+    val rows = tile.rows
+    private val cols = tile.cols
 
     init {
         setup(playerInventory)
@@ -27,32 +30,29 @@ class BaseChestContainer constructor(
     )
 
     private fun setup(inventory: PlayerInventory) {
-        // Slots for the hotbar
-        for (row in 0..8) {
-            val x = 8 + row * 18
-            val y = 56 + 86
-            addSlot(Slot(inventory, row, x, y))
-        }
-        // Slots for the main inventory
-        for (row in 1..3) {
-            for (col in 0..8) {
-                val x = 8 + col * 18
-                val y = row * 18 + (56 + 10)
-                addSlot(Slot(inventory, col + row * 9, x, y))
-            }
-        }
         // Slots for chest
+        val firstBlock = 8
         for (chestRow in 0 until rows) {
             for (chestCol in 0 until cols) {
-                addSlot(
-                    Slot(
-                        tile.chestInventory,
-                        chestCol + chestRow * rows,
-                        12 + chestCol * 18,
-                        8 + chestRow * 18,
-                    ),
-                )
+                val x = 12 + chestCol * 18
+                val y = firstBlock + chestRow * 18
+                addSlot(Slot(tile.chestInventory, chestRow + chestCol * cols, x, y))
             }
+        }
+        // Slots for the main inventory
+        val secondBlock = firstBlock + 4 + rows * 18
+        for (row in 0 until playerInvRows) {
+            for (col in 0 until playerInvCols) {
+                val x = 12 + col * 18
+                val y = secondBlock + row * 18
+                addSlot(Slot(inventory, col + (row + 1) * 9, x, y))
+            }
+        }
+        // Slots for the hotbar
+        val thirdBlock = secondBlock + 4 + playerInvRows * 18
+        for (row in 0 until playerInvCols) {
+            val x = 12 + row * 18
+            addSlot(Slot(inventory, row, x, thirdBlock))
         }
     }
 
