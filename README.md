@@ -10,3 +10,7 @@ Don't forget to run the `runData` task on gradle to generate the `src/generated/
 
 ## Screenshots
 
+![Screenshot 1](screenshots/screenshot-1.png)
+![Screenshot 2](screenshots/screenshot-2.png)
+
+
