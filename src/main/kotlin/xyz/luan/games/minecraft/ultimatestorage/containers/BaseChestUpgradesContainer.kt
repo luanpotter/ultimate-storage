@@ -11,15 +11,6 @@ import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 
 private val LOGGER = LogManager.getLogger()
 
-private const val HOTBAR_SLOT_COUNT = 9
-private const val PLAYER_INVENTORY_ROW_COUNT = 3
-private const val PLAYER_INVENTORY_COLUMN_COUNT = 9
-private const val PLAYER_INVENTORY_SLOT_COUNT = PLAYER_INVENTORY_COLUMN_COUNT * PLAYER_INVENTORY_ROW_COUNT
-private const val VANILLA_SLOT_COUNT = HOTBAR_SLOT_COUNT + PLAYER_INVENTORY_SLOT_COUNT
-
-private const val VANILLA_FIRST_SLOT_INDEX = 0
-private const val CONTAINER_FIRST_SLOT_INDEX = VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT
-
 class BaseChestUpgradesContainer constructor(
     windowId: Int,
     private var tile: BaseChestTileEntity,
@@ -36,13 +27,6 @@ class BaseChestUpgradesContainer constructor(
     )
 
     private fun setup(inventory: PlayerInventory) {
-        print("-------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------")
         val firstBlock = 8
         val secondBlock = firstBlock + 400
         val thirdBlock = secondBlock + 4 + PLAYER_INVENTORY_ROW_COUNT * 18
@@ -60,7 +44,7 @@ class BaseChestUpgradesContainer constructor(
             }
         }
         // main gui
-        print(tile.chestInventory.sizeInventory)
+        // TODO(luan) this
     }
 
     override fun canInteractWith(playerIn: PlayerEntity): Boolean {

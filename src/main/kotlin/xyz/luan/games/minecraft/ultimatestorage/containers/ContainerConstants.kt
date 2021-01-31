@@ -1,0 +1,10 @@
+package xyz.luan.games.minecraft.ultimatestorage.containers
+
+internal const val HOTBAR_SLOT_COUNT = 9
+internal const val PLAYER_INVENTORY_ROW_COUNT = 3
+internal const val PLAYER_INVENTORY_COLUMN_COUNT = 9
+internal const val PLAYER_INVENTORY_SLOT_COUNT = PLAYER_INVENTORY_COLUMN_COUNT * PLAYER_INVENTORY_ROW_COUNT
+internal const val VANILLA_SLOT_COUNT = HOTBAR_SLOT_COUNT + PLAYER_INVENTORY_SLOT_COUNT
+
+internal const val VANILLA_FIRST_SLOT_INDEX = 0
+internal const val CONTAINER_FIRST_SLOT_INDEX = VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT

@@ -6,20 +6,11 @@ import net.minecraft.inventory.container.Container
 import net.minecraft.inventory.container.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketBuffer
+import org.apache.logging.log4j.LogManager
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
-import org.apache.logging.log4j.LogManager;
 
 private val LOGGER = LogManager.getLogger()
-
-private const val HOTBAR_SLOT_COUNT = 9
-private const val PLAYER_INVENTORY_ROW_COUNT = 3
-private const val PLAYER_INVENTORY_COLUMN_COUNT = 9
-private const val PLAYER_INVENTORY_SLOT_COUNT = PLAYER_INVENTORY_COLUMN_COUNT * PLAYER_INVENTORY_ROW_COUNT
-private const val VANILLA_SLOT_COUNT = HOTBAR_SLOT_COUNT + PLAYER_INVENTORY_SLOT_COUNT
-
-private const val VANILLA_FIRST_SLOT_INDEX = 0
-private const val CONTAINER_FIRST_SLOT_INDEX = VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT
 
 class BaseChestContainer constructor(
     windowId: Int,
