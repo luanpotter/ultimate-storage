@@ -31,9 +31,11 @@ class BaseChestScreen(
         ySize = bgTopHeight + middleRows * bgRowHeight + bgBottomHeight
     }
 
+    override fun drawGuiContainerForegroundLayer(matrixStack: MatrixStack, x: Int, y: Int) {
+        // no titles
+    }
+    
     override fun drawGuiContainerBackgroundLayer(matrixStack: MatrixStack, partialTicks: Float, x: Int, y: Int) {
-        RenderSystem.color4f(1f, 1f, 1f, 1f)
-
         val renderer = Renderer(matrixStack, guiTop)
         renderer.render(bgTop, bgTopHeight)
         repeat(middleRows) {
