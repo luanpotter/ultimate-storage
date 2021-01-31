@@ -6,9 +6,6 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.ServerPlayerEntity
 import net.minecraft.inventory.InventoryHelper
 import net.minecraft.item.BlockItemUseContext
-import net.minecraft.item.ItemStack
-import net.minecraft.loot.LootContext
-import net.minecraft.nbt.CompoundNBT
 import net.minecraft.state.StateContainer
 import net.minecraft.state.properties.BlockStateProperties.HORIZONTAL_FACING
 import net.minecraft.tileentity.TileEntity
@@ -18,16 +15,17 @@ import net.minecraft.util.math.BlockRayTraceResult
 import net.minecraft.world.IBlockReader
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
-import net.minecraft.world.server.ServerWorld
 import net.minecraftforge.common.ToolType
 import net.minecraftforge.fml.network.NetworkHooks
 import net.minecraftforge.items.CapabilityItemHandler
-import net.minecraftforge.items.IItemHandler
+import xyz.luan.games.minecraft.ultimatestorage.Tier
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 
 
-class BaseChestBlock : ContainerBlock(
+class BaseChestBlock(
+    private val tier: Tier,
+) : ContainerBlock(
     Properties
         .create(Material.WOOD)
         .harvestTool(ToolType.AXE)
@@ -48,7 +46,7 @@ class BaseChestBlock : ContainerBlock(
     }
 
     override fun createNewTileEntity(worldIn: IBlockReader): TileEntity? {
-        return BlockRegistry.baseChestTileEntity.get().create()
+        return BlockRegistry.tiers.single { it.tier == tier }.tileEntity().create()
     }
 
     override fun hasTileEntity(state: BlockState?): Boolean = true
@@ -76,42 +74,20 @@ class BaseChestBlock : ContainerBlock(
     override fun onReplaced(state: BlockState, worldIn: World, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
         if (newState.block !== this) {
             val tileEntity = worldIn.getTileEntity(pos)
-            if (tileEntity != null) {
-                val cap = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-                cap.ifPresent { handler: IItemHandler ->
-                    for (i in 0 until handler.slots) InventoryHelper.spawnItemStack(
+            val cap = tileEntity?.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+            cap?.ifPresent { handler ->
+                for (i in 0 until handler.slots) {
+                    InventoryHelper.spawnItemStack(
                         worldIn,
-                        pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), handler.getStackInSlot(i)
+                        pos.x.toDouble(),
+                        pos.y.toDouble(),
+                        pos.z.toDouble(),
+                        handler.getStackInSlot(i),
                     )
                 }
             }
             super.onReplaced(state, worldIn, pos, newState, isMoving)
         }
-    }
-
-    override fun spawnAdditionalDrops(state: BlockState, worldIn: ServerWorld, pos: BlockPos, stack: ItemStack) {
-        super.spawnAdditionalDrops(state, worldIn, pos, stack)
-    }
-
-    override fun harvestBlock(
-        worldIn: World,
-        player: PlayerEntity,
-        pos: BlockPos,
-        state: BlockState,
-        te: TileEntity?,
-        stack: ItemStack
-    ) {
-        super.harvestBlock(worldIn, player, pos, state, te, stack)
-    }
-
-    override fun getDrops(state: BlockState, builder: LootContext.Builder): List<ItemStack> {
-        return listOf(ItemStack(this, 1, getMetaFromState(state)))
-    }
-
-    private fun getMetaFromState(state: BlockState): CompoundNBT {
-        // TODO implement custom metadata
-        // though I should probably use NBT
-        return CompoundNBT()
     }
 
     override fun mirror(state: BlockState, mirrorIn: Mirror): BlockState {

@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundNBT
 import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SUpdateTileEntityPacket
 import net.minecraft.tileentity.TileEntity
+import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.Direction
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.StringTextComponent
@@ -19,16 +20,16 @@ import net.minecraftforge.common.util.LazyOptional
 import net.minecraftforge.items.CapabilityItemHandler
 import net.minecraftforge.items.IItemHandlerModifiable
 import net.minecraftforge.items.wrapper.InvWrapper
+import xyz.luan.games.minecraft.ultimatestorage.Tier
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestContainer
 import xyz.luan.games.minecraft.ultimatestorage.readOrdered
-import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.writeOrdered
 
-class BaseChestTileEntity :
-    TileEntity(BlockRegistry.baseChestTileEntity.get()),
-    INamedContainerProvider,
-    ICapabilityProvider {
-    val rows = 5
+class BaseChestTileEntity(
+    tier: Tier,
+    tileEntityType: TileEntityType<BaseChestTileEntity>,
+) : TileEntity(tileEntityType), INamedContainerProvider, ICapabilityProvider {
+    val rows = tier.rowCount
     val cols = 9
 
     val inventorySize: Int

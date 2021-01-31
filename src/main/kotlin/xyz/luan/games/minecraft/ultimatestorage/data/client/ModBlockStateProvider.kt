@@ -12,15 +12,20 @@ class ModBlockStateProvider(
     existingFileHelper: ExistingFileHelper,
 ) : BlockStateProvider(generator, MOD_ID, existingFileHelper) {
     override fun registerStatesAndModels() {
+        BlockRegistry.tiers.forEach { registerTextureForTier(it) }
+    }
+
+    private fun registerTextureForTier(block: BlockRegistry.Registry) {
+        val name = block.tier.name.toLowerCase()
         horizontalBlock(
-            BlockRegistry.baseChest.get(),
+            block.block(),
             models().orientableWithBottom(
-                BlockRegistry.baseChest.get().registryName!!.path,
-                modLoc("block/wood-chest-side"),
-                modLoc("block/wood-chest-front"),
-                modLoc("block/wood-chest-bottom"),
-                modLoc("block/wood-chest-top"),
-            ).texture("particle", modLoc("block/wood-chest-side")),
+                block.block().registryName!!.path,
+                modLoc("block/gen/$name-side"),
+                modLoc("block/gen/$name-front"),
+                modLoc("block/gen/$name-bottom"),
+                modLoc("block/gen/$name-top"),
+            ).texture("particle", modLoc("block/gen/$name-side")),
         )
     }
 }

@@ -11,6 +11,7 @@ import net.minecraftforge.fml.RegistryObject
 import net.minecraftforge.registries.DeferredRegister
 import net.minecraftforge.registries.ForgeRegistries
 import thedarkcolour.kotlinforforge.forge.MOD_CONTEXT
+import xyz.luan.games.minecraft.ultimatestorage.Tier
 import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.MOD_ID
 import xyz.luan.games.minecraft.ultimatestorage.blocks.BaseChestBlock
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestContainer
@@ -21,6 +22,20 @@ object BlockRegistry {
     private val blocks = DeferredRegister.create(ForgeRegistries.BLOCKS, MOD_ID)
     private val tileEntities = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MOD_ID)
     private val containers = DeferredRegister.create(ForgeRegistries.CONTAINERS, MOD_ID)
+
+    class Registry(
+        val tier: Tier,
+        private val blockRegistry: RegistryObject<Block>,
+        private val tileEntityRegistry: RegistryObject<TileEntityType<BaseChestTileEntity>>,
+    ) {
+        fun block(): Block {
+            return blockRegistry.get()
+        }
+
+        fun tileEntity(): TileEntityType<BaseChestTileEntity> {
+            return tileEntityRegistry.get()
+        }
+    }
 
     fun register() {
         val bus = MOD_CONTEXT.getKEventBus()
@@ -35,15 +50,24 @@ object BlockRegistry {
         }
     }
 
-    val baseChest = addBlock("base_chest") { BaseChestBlock() }
-
-    val baseChestTileEntity: RegistryObject<TileEntityType<BaseChestTileEntity>> =
-        tileEntities.register("base_chest_tile") {
+    private fun registerTierChest(tier: Tier): Registry {
+        val name = tier.name.toLowerCase()
+        val chest = addBlock("${name}_tier_chest") { BaseChestBlock(tier) }
+        val tileEntity = tileEntities.register("${name}_tier_chest_tile") {
             TileEntityType.Builder.create(
-                { BaseChestTileEntity() },
-                baseChest.get()
+                { BaseChestTileEntity(tier, forTier(tier).tileEntity()) },
+                chest.get(),
             ).build(null)
         }
+        return Registry(tier, chest, tileEntity)
+    }
+
+    val tiers = Tier.values().map { registerTierChest(it) }
+
+    fun forTier(tier: Tier): Registry {
+        return tiers.single { it.tier == tier }
+    }
+
     val baseChestContainer: RegistryObject<ContainerType<BaseChestContainer>> =
         containers.register("base_chest_container") { IForgeContainerType.create(::BaseChestContainer) }
 }

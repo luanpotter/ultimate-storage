@@ -26,26 +26,28 @@ class ModLootTableProvider(generator: DataGenerator) : LootTableProvider(generat
 
     private class Blocks : BlockLootTables() {
         override fun addTables() {
+            BlockRegistry.tiers.forEach { addLootTable(it.block()) }
+        }
+
+        private fun addLootTable(block: Block) {
             val builder = LootPool.builder()
-                .name(BlockRegistry.baseChest.get().registryName.toString())
+                .name(block.registryName.toString())
                 .rolls(ConstantRange.of(1))
                 .acceptCondition(SurvivesExplosion.builder())
                 .addEntry(
                     ItemLootEntry
-                        .builder(BlockRegistry.baseChest.get())
+                        .builder(block)
                         .acceptFunction(CopyName.builder(CopyName.Source.BLOCK_ENTITY))
                 )
-            this.registerLootTable(BlockRegistry.baseChest.get(), LootTable.builder().addLootPool(builder))
+            registerLootTable(block, LootTable.builder().addLootPool(builder))
         }
 
         override fun getKnownBlocks(): Iterable<Block> {
-            return listOf(BlockRegistry.baseChest.get())
+            return BlockRegistry.tiers.map { it.block() }
         }
     }
 
     override fun validate(map: Map<ResourceLocation, LootTable>, validationtracker: ValidationTracker) {
-        map.forEach { (name: ResourceLocation, table: LootTable) ->
-            LootTableManager.validateLootTable(validationtracker, name, table)
-        }
+        map.forEach { (name, table) -> LootTableManager.validateLootTable(validationtracker, name, table) }
     }
 }
