@@ -11,6 +11,7 @@ import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.MOD_ID
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.registry.ItemRegistry
 import xyz.luan.games.minecraft.ultimatestorage.screens.BaseChestScreen
+import xyz.luan.games.minecraft.ultimatestorage.screens.BaseChestUpgradeScreen
 
 
 @Mod(MOD_ID)
@@ -29,5 +30,6 @@ object UltimateStorageMod {
 
     private fun onClientSetup(event: FMLClientSetupEvent) {
         ScreenManager.registerFactory(BlockRegistry.baseChestContainer.get(), ::BaseChestScreen)
+        ScreenManager.registerFactory(BlockRegistry.baseChestUpgradesContainer.get(), ::BaseChestUpgradeScreen)
     }
 }

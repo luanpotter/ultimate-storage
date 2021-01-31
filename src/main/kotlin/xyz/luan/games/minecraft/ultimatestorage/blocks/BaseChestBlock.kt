@@ -72,10 +72,9 @@ class BaseChestBlock(
 
         if (isUsingWrench(player, blockRayTraceResult)) {
             if (player.isSneaking) {
-                // open upgrade gui
+                return ActionResultType.PASS // handled by the ItemWrench
             } else if (blockRayTraceResult != null) {
-                print(blockRayTraceResult.face)
-                state.with(HORIZONTAL_FACING, blockRayTraceResult.face.opposite)
+                worldIn.setBlockState(pos, state.with(HORIZONTAL_FACING, blockRayTraceResult.face))
             }
         } else {
             NetworkHooks.openGui(serverPlayer, tileEntity, pos)

@@ -15,6 +15,7 @@ import xyz.luan.games.minecraft.ultimatestorage.Tier
 import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.MOD_ID
 import xyz.luan.games.minecraft.ultimatestorage.blocks.BaseChestBlock
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestContainer
+import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestUpgradesContainer
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 
 
@@ -70,4 +71,7 @@ object BlockRegistry {
 
     val baseChestContainer: RegistryObject<ContainerType<BaseChestContainer>> =
         containers.register("base_chest_container") { IForgeContainerType.create(::BaseChestContainer) }
+
+    val baseChestUpgradesContainer: RegistryObject<ContainerType<BaseChestUpgradesContainer>> =
+        containers.register("base_chest_upgrades_container") { IForgeContainerType.create(::BaseChestUpgradesContainer) }
 }

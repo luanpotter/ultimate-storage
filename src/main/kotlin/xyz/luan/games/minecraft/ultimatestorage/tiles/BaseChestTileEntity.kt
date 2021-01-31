@@ -22,11 +22,12 @@ import net.minecraftforge.items.IItemHandlerModifiable
 import net.minecraftforge.items.wrapper.InvWrapper
 import xyz.luan.games.minecraft.ultimatestorage.Tier
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestContainer
+import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestUpgradesContainer
 import xyz.luan.games.minecraft.ultimatestorage.readOrdered
 import xyz.luan.games.minecraft.ultimatestorage.writeOrdered
 
 class BaseChestTileEntity(
-    tier: Tier,
+    private val tier: Tier,
     tileEntityType: TileEntityType<BaseChestTileEntity>,
 ) : TileEntity(tileEntityType), INamedContainerProvider, ICapabilityProvider {
     val rows = tier.rowCount
@@ -40,6 +41,10 @@ class BaseChestTileEntity(
 
     override fun createMenu(windowId: Int, playerInventory: PlayerInventory, playerEntity: PlayerEntity?): Container {
         return BaseChestContainer(windowId, this, playerInventory)
+    }
+
+    fun createUpgradeMenu(windowId: Int, playerInventory: PlayerInventory, playerEntity: PlayerEntity?): Container {
+        return BaseChestUpgradesContainer(windowId, this, playerInventory)
     }
 
     override fun <T> getCapability(cap: Capability<T>, side: Direction?): LazyOptional<T> {
@@ -57,7 +62,7 @@ class BaseChestTileEntity(
     }
 
     override fun getDisplayName(): ITextComponent {
-        return StringTextComponent("Base Chest")
+        return StringTextComponent("${tier.name.toLowerCase().capitalize()} Chest")
     }
 
     override fun write(compound: CompoundNBT): CompoundNBT {
