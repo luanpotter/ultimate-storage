@@ -12,6 +12,7 @@ import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.*
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.BlockRayTraceResult
+import net.minecraft.util.math.RayTraceResult
 import net.minecraft.world.IBlockReader
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
@@ -20,6 +21,7 @@ import net.minecraftforge.fml.network.NetworkHooks
 import net.minecraftforge.items.CapabilityItemHandler
 import xyz.luan.games.minecraft.ultimatestorage.Tier
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
+import xyz.luan.games.minecraft.ultimatestorage.registry.ItemRegistry
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 
 
@@ -52,7 +54,7 @@ class BaseChestBlock(
     override fun hasTileEntity(state: BlockState?): Boolean = true
 
     override fun onBlockActivated(
-        state: BlockState?,
+        state: BlockState,
         worldIn: World,
         pos: BlockPos?,
         player: PlayerEntity?,
@@ -67,8 +69,29 @@ class BaseChestBlock(
         if (tileEntity !is BaseChestTileEntity) {
             return ActionResultType.FAIL
         }
-        NetworkHooks.openGui(serverPlayer, tileEntity, pos)
+
+        if (isUsingWrench(player, blockRayTraceResult)) {
+            if (player.isSneaking) {
+                // open upgrade gui
+            } else if (blockRayTraceResult != null) {
+                print(blockRayTraceResult.face)
+                state.with(HORIZONTAL_FACING, blockRayTraceResult.face.opposite)
+            }
+        } else {
+            NetworkHooks.openGui(serverPlayer, tileEntity, pos)
+        }
         return ActionResultType.SUCCESS
+    }
+
+    private fun isUsingWrench(player: PlayerEntity?, traceResult: RayTraceResult?): Boolean {
+        if (player == null || traceResult == null) {
+            return false
+        }
+
+        return sequenceOf(Hand.MAIN_HAND, Hand.OFF_HAND)
+            .map { player.getHeldItem(it) }
+            .mapNotNull { it.takeUnless { it.isEmpty }?.item }
+            .any { it.registryName == ItemRegistry.wrench.get().registryName }
     }
 
     override fun onReplaced(state: BlockState, worldIn: World, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
@@ -94,8 +117,8 @@ class BaseChestBlock(
         return state.rotate(mirrorIn.toRotation(state.get(HORIZONTAL_FACING)))
     }
 
-    override fun rotate(state: BlockState, world: IWorld, pos: BlockPos, direction: Rotation): BlockState {
-        return state.with(HORIZONTAL_FACING, direction.rotate(state.get(HORIZONTAL_FACING)))
+    override fun rotate(state: BlockState, world: IWorld, pos: BlockPos, rotation: Rotation): BlockState {
+        return state.with(HORIZONTAL_FACING, rotation.rotate(state.get(HORIZONTAL_FACING)))
     }
 
     override fun getStateForPlacement(context: BlockItemUseContext): BlockState {

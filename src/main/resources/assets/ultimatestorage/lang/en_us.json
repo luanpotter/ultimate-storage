@@ -1,4 +1,8 @@
 {
+  "block.ultimatestorage.wood_tier_chest": "Wood Tier Chest",
+  "block.ultimatestorage.iron_tier_chest": "Iron Tier Chest",
+  "block.ultimatestorage.gold_tier_chest": "Gold Tier Chest",
+  "block.ultimatestorage.diamond_tier_chest": "Diamond Tier Chest",
   "item.ultimatestorage.base_upgrade": "Base Upgrade",
-  "block.ultimatestorage.base_chest": "Base Chest"
+  "item.ultimatestorage.wrench": "Wrench"
 }

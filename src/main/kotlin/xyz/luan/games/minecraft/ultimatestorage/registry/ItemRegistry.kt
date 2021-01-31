@@ -2,6 +2,7 @@ package xyz.luan.games.minecraft.ultimatestorage.registry
 
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
+import net.minecraftforge.common.ToolType
 import net.minecraftforge.fml.RegistryObject
 import net.minecraftforge.registries.DeferredRegister
 import net.minecraftforge.registries.ForgeRegistries
@@ -21,5 +22,7 @@ object ItemRegistry {
     }
 
     val baseUpgrade = addItem("base_upgrade") { Item(Item.Properties().group(ItemGroup.MISC)) }
-    val wrench = addItem("wrench") { Item(Item.Properties().group(ItemGroup.MISC)) }
+    val wrench = addItem("wrench") {
+        Item(Item.Properties().addToolType(ToolType.get("wrench"), 1).group(ItemGroup.MISC))
+    }
 }
