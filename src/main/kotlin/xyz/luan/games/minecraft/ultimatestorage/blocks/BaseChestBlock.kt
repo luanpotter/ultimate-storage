@@ -90,7 +90,7 @@ class BaseChestBlock(
         return sequenceOf(Hand.MAIN_HAND, Hand.OFF_HAND)
             .map { player.getHeldItem(it) }
             .mapNotNull { it.takeUnless { it.isEmpty }?.item }
-            .any { it.registryName == ItemRegistry.wrench.get().registryName }
+            .contains(ItemRegistry.wrench.get())
     }
 
     override fun onReplaced(state: BlockState, worldIn: World, pos: BlockPos, newState: BlockState, isMoving: Boolean) {

@@ -2,26 +2,23 @@ package xyz.luan.games.minecraft.ultimatestorage.containers
 
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.inventory.container.Container
 import net.minecraft.inventory.container.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketBuffer
-import org.apache.logging.log4j.LogManager
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
-
-private val LOGGER = LogManager.getLogger()
 
 class BaseChestContainer constructor(
     windowId: Int,
     private var tile: BaseChestTileEntity,
     playerInventory: PlayerInventory,
-) : Container(BlockRegistry.baseChestContainer.get(), windowId) {
+) : GenericContainer(BlockRegistry.baseChestContainer.get(), windowId) {
     val rows
         get() = tile.rows
     private val cols
         get() = tile.cols
-    private val inventorySize
+
+    override val inventorySize
         get() = tile.inventorySize
 
     init {
@@ -61,53 +58,11 @@ class BaseChestContainer constructor(
         }
     }
 
+    override fun canAcceptItemStack(sourceStack: ItemStack): Boolean {
+        return true
+    }
+   
     override fun canInteractWith(playerIn: PlayerEntity): Boolean {
         return true // TODO this
-    }
-
-    override fun transferStackInSlot(playerIn: PlayerEntity, sourceSlotIndex: Int): ItemStack? {
-        val sourceSlot = inventorySlots[sourceSlotIndex]
-        if (sourceSlot == null || !sourceSlot.hasStack) return ItemStack.EMPTY
-
-        val sourceStack = sourceSlot.stack
-        val copyOfSourceStack = sourceStack.copy()
-
-        // Check if the slot clicked is one of the vanilla container slots
-        if (sourceSlotIndex >= VANILLA_FIRST_SLOT_INDEX && sourceSlotIndex < VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT) {
-            // This is a vanilla container slot so merge the stack into the tile inventory
-            if (!mergeItemStack(
-                    sourceStack,
-                    CONTAINER_FIRST_SLOT_INDEX,
-                    CONTAINER_FIRST_SLOT_INDEX + inventorySize,
-                    false
-                )
-            ) {
-                return ItemStack.EMPTY
-            }
-        } else if (sourceSlotIndex >= CONTAINER_FIRST_SLOT_INDEX && sourceSlotIndex < CONTAINER_FIRST_SLOT_INDEX + inventorySize) {
-            // This is a TE slot so merge the stack into the players inventory
-            if (!mergeItemStack(
-                    sourceStack,
-                    VANILLA_FIRST_SLOT_INDEX,
-                    VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT,
-                    false
-                )
-            ) {
-                return ItemStack.EMPTY
-            }
-        } else {
-            LOGGER.warn("Invalid slotIndex:$sourceSlotIndex")
-            return ItemStack.EMPTY
-        }
-
-        // If stack size == 0 (the entire stack was moved) set slot contents to null
-        if (sourceStack.count == 0) {
-            sourceSlot.putStack(ItemStack.EMPTY)
-        } else {
-            sourceSlot.onSlotChanged()
-        }
-
-        sourceSlot.onTake(playerIn, sourceStack)
-        return copyOfSourceStack
     }
 }

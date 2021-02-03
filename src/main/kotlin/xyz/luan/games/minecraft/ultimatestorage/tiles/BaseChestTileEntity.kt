@@ -39,6 +39,8 @@ class BaseChestTileEntity(
     val chestInventory = Inventory(inventorySize)
     private var chestHandler: LazyOptional<IItemHandlerModifiable>? = null
 
+    val chestUpgrades = Inventory(9)
+
     override fun createMenu(windowId: Int, playerInventory: PlayerInventory, playerEntity: PlayerEntity?): Container {
         return BaseChestContainer(windowId, this, playerInventory)
     }
@@ -67,13 +69,14 @@ class BaseChestTileEntity(
 
     override fun write(compound: CompoundNBT): CompoundNBT {
         compound.put("chest-contents", chestInventory.writeOrdered())
+        compound.put("chest-upgrades", chestUpgrades.writeOrdered())
         return super.write(compound)
     }
 
     override fun read(state: BlockState, nbt: CompoundNBT) {
+        chestInventory.readOrdered(nbt.getList("chest-contents", 10))
+        chestUpgrades.readOrdered(nbt.getList("chest-upgrades", 10))
         super.read(state, nbt)
-        val inventoryNBT = nbt.getList("chest-contents", 10)
-        chestInventory.readOrdered(inventoryNBT)
     }
 
     override fun handleUpdateTag(stateIn: BlockState, tag: CompoundNBT) {

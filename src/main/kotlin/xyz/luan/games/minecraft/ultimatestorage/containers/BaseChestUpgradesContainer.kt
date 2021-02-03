@@ -2,20 +2,22 @@ package xyz.luan.games.minecraft.ultimatestorage.containers
 
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.inventory.container.Container
 import net.minecraft.inventory.container.Slot
+import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketBuffer
-import org.apache.logging.log4j.LogManager
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
+import xyz.luan.games.minecraft.ultimatestorage.registry.ItemRegistry
+import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
-
-private val LOGGER = LogManager.getLogger()
 
 class BaseChestUpgradesContainer constructor(
     windowId: Int,
     private var tile: BaseChestTileEntity,
     playerInventory: PlayerInventory,
-) : Container(BlockRegistry.baseChestUpgradesContainer.get(), windowId) {
+) : GenericContainer(BlockRegistry.baseChestUpgradesContainer.get(), windowId) {
+    override val inventorySize
+        get() = tile.chestUpgrades.sizeInventory
+
     init {
         setup(playerInventory)
     }
@@ -28,7 +30,7 @@ class BaseChestUpgradesContainer constructor(
 
     private fun setup(inventory: PlayerInventory) {
         val firstBlock = 8
-        val secondBlock = firstBlock + 400
+        val secondBlock = firstBlock + BgSegment.upgrades.height + 18 + 4
         val thirdBlock = secondBlock + 4 + PLAYER_INVENTORY_ROW_COUNT * 18
         // Slots for the hotbar
         for (row in 0 until PLAYER_INVENTORY_COLUMN_COUNT) {
@@ -43,8 +45,15 @@ class BaseChestUpgradesContainer constructor(
                 addSlot(Slot(inventory, col + (row + 1) * 9, x, y))
             }
         }
-        // main gui
-        // TODO(luan) this
+        // main upgrade gui
+        for (idx in 0 until PLAYER_INVENTORY_COLUMN_COUNT) {
+            val x = 12 + idx * 18
+            addSlot(Slot(tile.chestUpgrades, idx, x, firstBlock))
+        }
+    }
+
+    override fun canAcceptItemStack(sourceStack: ItemStack): Boolean {
+        return sourceStack.item == ItemRegistry.baseUpgrade.get()
     }
 
     override fun canInteractWith(playerIn: PlayerEntity): Boolean {
