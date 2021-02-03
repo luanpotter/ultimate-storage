@@ -3,7 +3,6 @@ package xyz.luan.games.minecraft.ultimatestorage.containers
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.container.Slot
-import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketBuffer
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
@@ -58,10 +57,6 @@ class BaseChestContainer constructor(
         }
     }
 
-    override fun canAcceptItemStack(sourceStack: ItemStack): Boolean {
-        return true
-    }
-   
     override fun canInteractWith(playerIn: PlayerEntity): Boolean {
         return true // TODO this
     }

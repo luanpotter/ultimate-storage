@@ -1,6 +1,8 @@
 package xyz.luan.games.minecraft.ultimatestorage
 
 import net.minecraft.client.gui.ScreenManager
+import net.minecraft.item.ItemGroup
+import net.minecraft.item.ItemStack
 import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
@@ -31,5 +33,11 @@ object UltimateStorageMod {
     private fun onClientSetup(event: FMLClientSetupEvent) {
         ScreenManager.registerFactory(BlockRegistry.baseChestContainer.get(), ::BaseChestScreen)
         ScreenManager.registerFactory(BlockRegistry.baseChestUpgradesContainer.get(), ::BaseChestUpgradeScreen)
+    }
+
+    val itemGroup = object : ItemGroup("ultimatestorage") {
+        override fun createIcon(): ItemStack {
+            return ItemStack(BlockRegistry.tiers.last().block().asItem())
+        }
     }
 }

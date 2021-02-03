@@ -4,5 +4,8 @@
   "block.ultimatestorage.gold_tier_chest": "Gold Tier Chest",
   "block.ultimatestorage.diamond_tier_chest": "Diamond Tier Chest",
   "item.ultimatestorage.base_upgrade": "Base Upgrade",
-  "item.ultimatestorage.wrench": "Wrench"
+  "item.ultimatestorage.capacity_upgrade": "Capacity Upgrade",
+  "item.ultimatestorage.filter_upgrade": "Filter Upgrade",
+  "item.ultimatestorage.wrench": "Wrench",
+  "itemGroup.ultimatestorage": "Ultimate Storage"
 }

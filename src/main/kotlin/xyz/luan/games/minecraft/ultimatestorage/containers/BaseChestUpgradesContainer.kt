@@ -2,6 +2,7 @@ package xyz.luan.games.minecraft.ultimatestorage.containers
 
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.container.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketBuffer
@@ -12,7 +13,7 @@ import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 
 class BaseChestUpgradesContainer constructor(
     windowId: Int,
-    private var tile: BaseChestTileEntity,
+    val tile: BaseChestTileEntity,
     playerInventory: PlayerInventory,
 ) : GenericContainer(BlockRegistry.baseChestUpgradesContainer.get(), windowId) {
     override val inventorySize
@@ -46,14 +47,24 @@ class BaseChestUpgradesContainer constructor(
             }
         }
         // main upgrade gui
-        for (idx in 0 until PLAYER_INVENTORY_COLUMN_COUNT) {
-            val x = 12 + idx * 18
-            addSlot(Slot(tile.chestUpgrades, idx, x, firstBlock))
+        for (idx in 0 until tile.chestUpgrades.sizeInventory) {
+            addSlot(UpgradeSlot(tile.chestUpgrades, idx, 12 + idx * 18, firstBlock))
         }
     }
 
-    override fun canAcceptItemStack(sourceStack: ItemStack): Boolean {
-        return sourceStack.item == ItemRegistry.baseUpgrade.get()
+    class UpgradeSlot(
+        inventoryIn: IInventory,
+        index: Int,
+        xPosition: Int,
+        yPosition: Int
+    ) : Slot(inventoryIn, index, xPosition, yPosition) {
+        override fun getSlotStackLimit(): Int {
+            return 1
+        }
+
+        override fun isItemValid(stack: ItemStack): Boolean {
+            return ItemRegistry.allUpgrades.any { it.get() == stack.item }
+        }
     }
 
     override fun canInteractWith(playerIn: PlayerEntity): Boolean {

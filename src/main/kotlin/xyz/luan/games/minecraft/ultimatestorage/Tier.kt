@@ -1,7 +1,7 @@
 package xyz.luan.games.minecraft.ultimatestorage
 
 enum class Tier(
-    val rowCount: Int,
+    val upgradeSlots: Int,
 ) {
     WOOD(3),
     IRON(5),

@@ -4,7 +4,6 @@ import net.minecraft.block.Block
 import net.minecraft.inventory.container.ContainerType
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
-import net.minecraft.item.ItemGroup
 import net.minecraft.tileentity.TileEntityType
 import net.minecraftforge.common.extensions.IForgeContainerType
 import net.minecraftforge.fml.RegistryObject
@@ -13,6 +12,7 @@ import net.minecraftforge.registries.ForgeRegistries
 import thedarkcolour.kotlinforforge.forge.MOD_CONTEXT
 import xyz.luan.games.minecraft.ultimatestorage.Tier
 import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.MOD_ID
+import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.itemGroup
 import xyz.luan.games.minecraft.ultimatestorage.blocks.BaseChestBlock
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestContainer
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestUpgradesContainer
@@ -47,7 +47,7 @@ object BlockRegistry {
 
     private fun addBlock(name: String, block: () -> Block): RegistryObject<Block> {
         return blocks.register(name, block).also {
-            ItemRegistry.addItem(name) { BlockItem(it.get(), Item.Properties().group(ItemGroup.MISC)) }
+            ItemRegistry.addItem(name) { BlockItem(it.get(), Item.Properties().group(itemGroup)) }
         }
     }
 

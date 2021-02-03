@@ -18,8 +18,8 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import net.minecraftforge.common.ToolType
 import net.minecraftforge.fml.network.NetworkHooks
-import net.minecraftforge.items.CapabilityItemHandler
 import xyz.luan.games.minecraft.ultimatestorage.Tier
+import xyz.luan.games.minecraft.ultimatestorage.getContents
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.registry.ItemRegistry
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
@@ -95,20 +95,22 @@ class BaseChestBlock(
 
     override fun onReplaced(state: BlockState, worldIn: World, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
         if (newState.block !== this) {
-            val tileEntity = worldIn.getTileEntity(pos)
-            val cap = tileEntity?.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-            cap?.ifPresent { handler ->
-                for (i in 0 until handler.slots) {
-                    InventoryHelper.spawnItemStack(
-                        worldIn,
-                        pos.x.toDouble(),
-                        pos.y.toDouble(),
-                        pos.z.toDouble(),
-                        handler.getStackInSlot(i),
-                    )
-                }
+            val tileEntity = worldIn.getTileEntity(pos) as? BaseChestTileEntity
+            if (tileEntity != null) {
+                dropContents(tileEntity, worldIn, pos)
             }
             super.onReplaced(state, worldIn, pos, newState, isMoving)
+        }
+    }
+
+    private fun dropContents(
+        tileEntity: BaseChestTileEntity,
+        worldIn: World,
+        pos: BlockPos,
+    ) {
+        val allItems = tileEntity.chestInventory.getContents() + tileEntity.chestUpgrades.getContents()
+        allItems.forEach {
+            InventoryHelper.spawnItemStack(worldIn, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), it)
         }
     }
 

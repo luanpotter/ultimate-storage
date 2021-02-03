@@ -16,12 +16,12 @@ abstract class BaseScreen<T : Container>(
         private val matrixStack: MatrixStack,
         private var currentY: Int,
     ) {
-        fun render(segment: BgSegment, renderSlotOverlay: BgSegment? = null) {
+        fun render(segment: BgSegment, renderSlotOverlay: BgSegment? = null, amount: Int = 0) {
             bindTexture(segment.texture)
             segment.render(guiLeft, currentY)
             if (renderSlotOverlay != null) {
                 bindTexture(renderSlotOverlay.texture)
-                segment.slots.forEach { renderSlotOverlay.render(guiLeft + it.x + 1, currentY + it.y + 1) }
+                segment.slots.take(amount).forEach { renderSlotOverlay.render(guiLeft + it.x, currentY + it.y) }
             }
             currentY += segment.height
         }

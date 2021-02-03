@@ -23,7 +23,11 @@ class BaseChestUpgradeScreen(
         val renderer = Renderer(matrixStack, guiTop)
 
         renderer.render(BgSegment.top)
-        renderer.render(BgSegment.row, renderSlotOverlay = BgSegment.baseUpgradeOverlay)
+        renderer.render(
+            BgSegment.emptyRow,
+            renderSlotOverlay = BgSegment.baseUpgradeOverlay,
+            amount = container.tile.tier.upgradeSlots,
+        )
         renderer.render(BgSegment.upgradesEmpty)
         renderer.render(BgSegment.bottom)
     }

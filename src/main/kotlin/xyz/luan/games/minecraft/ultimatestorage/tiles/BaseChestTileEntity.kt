@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventory
+import net.minecraft.inventory.InventoryHelper
 import net.minecraft.inventory.container.Container
 import net.minecraft.inventory.container.INamedContainerProvider
 import net.minecraft.nbt.CompoundNBT
@@ -23,25 +24,54 @@ import net.minecraftforge.items.wrapper.InvWrapper
 import xyz.luan.games.minecraft.ultimatestorage.Tier
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestContainer
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestUpgradesContainer
+import xyz.luan.games.minecraft.ultimatestorage.getContents
 import xyz.luan.games.minecraft.ultimatestorage.readOrdered
+import xyz.luan.games.minecraft.ultimatestorage.registry.ItemRegistry
 import xyz.luan.games.minecraft.ultimatestorage.writeOrdered
 
 class BaseChestTileEntity(
-    private val tier: Tier,
+    val tier: Tier,
     tileEntityType: TileEntityType<BaseChestTileEntity>,
 ) : TileEntity(tileEntityType), INamedContainerProvider, ICapabilityProvider {
-    val rows = tier.rowCount
-    val cols = 9
+    val chestUpgrades = Inventory(tier.upgradeSlots)
 
-    val inventorySize: Int
-        get() = rows * cols
+    var rows: Int = 3
+    var cols: Int = 9
 
-    val chestInventory = Inventory(inventorySize)
-    private var chestHandler: LazyOptional<IItemHandlerModifiable>? = null
+    var inventorySize: Int = rows * cols
+    var chestInventory = Inventory(inventorySize)
+    var chestHandler: LazyOptional<IItemHandlerModifiable>? = null
 
-    val chestUpgrades = Inventory(9)
+    init {
+        updateRowCount()
+        chestUpgrades.addListener { updateRowCount() }
+    }
+
+    private fun updateRowCount() {
+        val capacityUpgrades = chestUpgrades.getContents().count { it.item == ItemRegistry.capacityUpgrade.get() }
+        val newRows = 3 + capacityUpgrades
+        if (newRows == rows) return
+
+        rows = newRows
+        cols = 9
+        inventorySize = rows * cols
+
+        val previousContents = chestInventory.getContents()
+        chestInventory = Inventory(inventorySize)
+        previousContents.take(inventorySize).forEachIndexed { slot, item ->
+            chestInventory.setInventorySlotContents(slot, item)
+        }
+        world?.let { worldIn ->
+            previousContents.drop(inventorySize).forEach {
+                InventoryHelper.spawnItemStack(worldIn, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), it)
+            }
+        }
+
+        chestHandler = null
+    }
 
     override fun createMenu(windowId: Int, playerInventory: PlayerInventory, playerEntity: PlayerEntity?): Container {
+        updateRowCount()
         return BaseChestContainer(windowId, this, playerInventory)
     }
 
@@ -68,15 +98,16 @@ class BaseChestTileEntity(
     }
 
     override fun write(compound: CompoundNBT): CompoundNBT {
-        compound.put("chest-contents", chestInventory.writeOrdered())
         compound.put("chest-upgrades", chestUpgrades.writeOrdered())
+        compound.put("chest-contents", chestInventory.writeOrdered())
         return super.write(compound)
     }
 
     override fun read(state: BlockState, nbt: CompoundNBT) {
-        chestInventory.readOrdered(nbt.getList("chest-contents", 10))
-        chestUpgrades.readOrdered(nbt.getList("chest-upgrades", 10))
         super.read(state, nbt)
+        chestUpgrades.readOrdered(nbt.getList("chest-upgrades", 10))
+        updateRowCount()
+        chestInventory.readOrdered(nbt.getList("chest-contents", 10))
     }
 
     override fun handleUpdateTag(stateIn: BlockState, tag: CompoundNBT) {

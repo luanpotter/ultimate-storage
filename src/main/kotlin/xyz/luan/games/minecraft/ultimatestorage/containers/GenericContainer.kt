@@ -11,8 +11,6 @@ private val LOGGER = LogManager.getLogger()
 abstract class GenericContainer(type: ContainerType<*>, windowId: Int) : Container(type, windowId) {
     abstract val inventorySize: Int
 
-    abstract fun canAcceptItemStack(sourceStack: ItemStack): Boolean
-
     override fun transferStackInSlot(playerIn: PlayerEntity, sourceSlotIndex: Int): ItemStack? {
         val sourceSlot = inventorySlots[sourceSlotIndex]
         if (sourceSlot == null || !sourceSlot.hasStack) return ItemStack.EMPTY
@@ -23,9 +21,6 @@ abstract class GenericContainer(type: ContainerType<*>, windowId: Int) : Contain
         // Check if the slot clicked is one of the vanilla container slots
         if (sourceSlotIndex >= VANILLA_FIRST_SLOT_INDEX && sourceSlotIndex < VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT) {
             // This is a vanilla container slot so merge the stack into the tile inventory
-            if (!canAcceptItemStack(sourceStack)) {
-                return ItemStack.EMPTY
-            }
             if (!mergeItemStack(
                     sourceStack,
                     CONTAINER_FIRST_SLOT_INDEX,
