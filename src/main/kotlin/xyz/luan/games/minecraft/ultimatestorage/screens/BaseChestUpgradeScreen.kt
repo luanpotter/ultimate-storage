@@ -17,6 +17,11 @@ class BaseChestUpgradeScreen(
 
     override fun drawGuiContainerForegroundLayer(matrixStack: MatrixStack, x: Int, y: Int) {
         // no titles
+
+        val renderer = Renderer(matrixStack, guiTop)
+
+        renderer.skip(BgSegment.top)
+        renderer.text("Select an update to configure", 18, 2)
     }
 
     override fun drawGuiContainerBackgroundLayer(matrixStack: MatrixStack, partialTicks: Float, x: Int, y: Int) {

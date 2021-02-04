@@ -21,13 +21,10 @@ import net.minecraftforge.common.util.LazyOptional
 import net.minecraftforge.items.CapabilityItemHandler
 import net.minecraftforge.items.IItemHandlerModifiable
 import net.minecraftforge.items.wrapper.InvWrapper
-import xyz.luan.games.minecraft.ultimatestorage.Tier
+import xyz.luan.games.minecraft.ultimatestorage.*
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestContainer
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestUpgradesContainer
-import xyz.luan.games.minecraft.ultimatestorage.getContents
-import xyz.luan.games.minecraft.ultimatestorage.readOrdered
 import xyz.luan.games.minecraft.ultimatestorage.registry.ItemRegistry
-import xyz.luan.games.minecraft.ultimatestorage.writeOrdered
 
 class BaseChestTileEntity(
     val tier: Tier,
@@ -35,15 +32,16 @@ class BaseChestTileEntity(
 ) : TileEntity(tileEntityType), INamedContainerProvider, ICapabilityProvider {
     val chestUpgrades = Inventory(tier.upgradeSlots)
 
-    var rows: Int = 3
-    var cols: Int = 9
+    var rows: Int = 0
+    var cols: Int = 0
 
-    var inventorySize: Int = rows * cols
+    val inventorySize: Int
+        get() = rows * cols
+
     var chestInventory = Inventory(inventorySize)
     var chestHandler: LazyOptional<IItemHandlerModifiable>? = null
 
     init {
-        updateRowCount()
         chestUpgrades.addListener { updateRowCount() }
     }
 
@@ -54,16 +52,15 @@ class BaseChestTileEntity(
 
         rows = newRows
         cols = 9
-        inventorySize = rows * cols
 
         val previousContents = chestInventory.getContents()
         chestInventory = Inventory(inventorySize)
         previousContents.take(inventorySize).forEachIndexed { slot, item ->
             chestInventory.setInventorySlotContents(slot, item)
         }
-        world?.let { worldIn ->
+        world?.let { world ->
             previousContents.drop(inventorySize).forEach {
-                InventoryHelper.spawnItemStack(worldIn, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), it)
+                InventoryHelper.spawnItemStack(world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), it)
             }
         }
 
@@ -71,7 +68,6 @@ class BaseChestTileEntity(
     }
 
     override fun createMenu(windowId: Int, playerInventory: PlayerInventory, playerEntity: PlayerEntity?): Container {
-        updateRowCount()
         return BaseChestContainer(windowId, this, playerInventory)
     }
 
@@ -110,11 +106,19 @@ class BaseChestTileEntity(
         chestInventory.readOrdered(nbt.getList("chest-contents", 10))
     }
 
+    override fun getUpdateTag(): CompoundNBT {
+        return CompoundNBT().apply { write(this) }
+    }
+
+    override fun getUpdatePacket(): SUpdateTileEntityPacket {
+        return SUpdateTileEntityPacket(pos, UltimateStorageMod.TILE_ENTITY_TYPE, updateTag)
+    }
+
     override fun handleUpdateTag(stateIn: BlockState, tag: CompoundNBT) {
         read(stateIn, tag)
     }
 
     override fun onDataPacket(net: NetworkManager, pkt: SUpdateTileEntityPacket) {
-        read(blockState, pkt.nbtCompound)
+        handleUpdateTag(blockState, pkt.nbtCompound)
     }
 }

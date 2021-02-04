@@ -6,6 +6,9 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.container.Container
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
+import java.awt.Color
+
+val textColor = Color(55, 55, 55).rgb
 
 abstract class BaseScreen<T : Container>(
     container: T,
@@ -16,6 +19,16 @@ abstract class BaseScreen<T : Container>(
         private val matrixStack: MatrixStack,
         private var currentY: Int,
     ) {
+        fun text(text: String, dx: Int, dy: Int) {
+            val x = dx.toFloat()
+            val y = (currentY - guiTop) + dy.toFloat() + getMinecraft().fontRenderer.FONT_HEIGHT
+            getMinecraft().fontRenderer.drawString(matrixStack, text, x, y, textColor)
+        }
+
+        fun skip(segment: BgSegment) {
+            currentY += segment.height
+        }
+
         fun render(segment: BgSegment, renderSlotOverlay: BgSegment? = null, amount: Int = 0) {
             bindTexture(segment.texture)
             segment.render(guiLeft, currentY)
@@ -23,15 +36,15 @@ abstract class BaseScreen<T : Container>(
                 bindTexture(renderSlotOverlay.texture)
                 segment.slots.take(amount).forEach { renderSlotOverlay.render(guiLeft + it.x, currentY + it.y) }
             }
-            currentY += segment.height
+            skip(segment)
         }
 
-        private fun BgSegment.render(x: Int, y: Int) {
-            blit(matrixStack, x, y, this.x, this.y, width, height)
+        private fun BgSegment.render(dx: Int, dy: Int) {
+            blit(matrixStack, dx, dy, this.x, this.y, width, height)
         }
 
         private fun bindTexture(texture: ResourceLocation) {
-            getMinecraft().getTextureManager().bindTexture(texture)
+            getMinecraft().textureManager.bindTexture(texture)
         }
     }
 }

@@ -19,6 +19,8 @@ import xyz.luan.games.minecraft.ultimatestorage.screens.BaseChestUpgradeScreen
 @Mod(MOD_ID)
 object UltimateStorageMod {
     const val MOD_ID = "ultimatestorage"
+    const val TILE_ENTITY_TYPE = 42
+
     val LOGGER: Logger = LogManager.getLogger()
 
     init {

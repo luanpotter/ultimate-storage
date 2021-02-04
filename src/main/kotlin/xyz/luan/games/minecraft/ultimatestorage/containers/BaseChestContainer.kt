@@ -9,7 +9,7 @@ import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 
 class BaseChestContainer constructor(
     windowId: Int,
-    private var tile: BaseChestTileEntity,
+    private val tile: BaseChestTileEntity,
     playerInventory: PlayerInventory,
 ) : GenericContainer(BlockRegistry.baseChestContainer.get(), windowId) {
     val rows
