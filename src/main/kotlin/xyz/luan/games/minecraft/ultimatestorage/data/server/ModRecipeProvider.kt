@@ -27,6 +27,36 @@ class ModRecipeProvider(generator: DataGenerator) : RecipeProvider(generator) {
             .build(consumer)
 
         ShapedRecipeBuilder
+            .shapedRecipe(BlockRegistry.forTier(Tier.IRON).block())
+            .patternLine("III")
+            .patternLine("ICI")
+            .patternLine("III")
+            .key('C', BlockRegistry.forTier(Tier.WOOD).block())
+            .key('I', Items.IRON_INGOT)
+            .addCriterion("has_ultimate_chests", hasItem(BlockRegistry.forTier(Tier.WOOD).block()))
+            .build(consumer)
+
+        ShapedRecipeBuilder
+            .shapedRecipe(BlockRegistry.forTier(Tier.IRON).block())
+            .patternLine("GGG")
+            .patternLine("GCG")
+            .patternLine("GGG")
+            .key('C', BlockRegistry.forTier(Tier.IRON).block())
+            .key('G', Items.GOLD_INGOT)
+            .addCriterion("has_ultimate_chests", hasItem(BlockRegistry.forTier(Tier.IRON).block()))
+            .build(consumer)
+
+        ShapedRecipeBuilder
+            .shapedRecipe(BlockRegistry.forTier(Tier.DIAMOND).block())
+            .patternLine("DDD")
+            .patternLine("DCD")
+            .patternLine("DDD")
+            .key('C', BlockRegistry.forTier(Tier.GOLD).block())
+            .key('D', Items.DIAMOND)
+            .addCriterion("has_ultimate_chests", hasItem(BlockRegistry.forTier(Tier.GOLD).block()))
+            .build(consumer)
+
+        ShapedRecipeBuilder
             .shapedRecipe(ItemRegistry.baseUpgrade.get(), 16)
             .patternLine("WIW")
             .patternLine("SBS")
@@ -37,7 +67,7 @@ class ModRecipeProvider(generator: DataGenerator) : RecipeProvider(generator) {
             .key('B', Items.SLIME_BALL)
             .key('P', Items.PAPER)
             .key('R', Items.REDSTONE)
-            .addCriterion("has_chests", hasItem(Tags.Items.CHESTS))
+            .addCriterion("has_ultimate_chests", hasItem(BlockRegistry.forTier(Tier.WOOD).block()))
             .build(consumer)
 
         ShapedRecipeBuilder
@@ -48,7 +78,19 @@ class ModRecipeProvider(generator: DataGenerator) : RecipeProvider(generator) {
             .key('I', Items.IRON_INGOT)
             .key('N', Items.IRON_NUGGET)
             .key('U', ItemRegistry.baseUpgrade.get())
-            .addCriterion("has_chests", hasItem(Tags.Items.CHESTS))
+            .addCriterion("has_upgrades", hasItem(ItemRegistry.baseUpgrade.get()))
+            .build(consumer)
+
+        ShapedRecipeBuilder
+            .shapedRecipe(ItemRegistry.capacityUpgrade.get())
+            .patternLine("CSC")
+            .patternLine("HUH")
+            .patternLine("CSC")
+            .key('C', Items.CHEST)
+            .key('S', ItemTags.SLABS)
+            .key('H', Items.HOPPER)
+            .key('U', ItemRegistry.baseUpgrade.get())
+            .addCriterion("has_upgrades", hasItem(ItemRegistry.baseUpgrade.get()))
             .build(consumer)
     }
 
