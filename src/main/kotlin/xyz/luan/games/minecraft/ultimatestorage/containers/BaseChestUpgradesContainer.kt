@@ -31,7 +31,7 @@ class BaseChestUpgradesContainer constructor(
 
     private fun setup(inventory: PlayerInventory) {
         val firstBlock = 8
-        val secondBlock = firstBlock + BgSegment.upgrades.height + 18 + 4
+        val secondBlock = firstBlock + BgSegment.upgrades.height + BgSegment.emptyRow.height + 4
         val thirdBlock = secondBlock + 4 + PLAYER_INVENTORY_ROW_COUNT * 18
         // Slots for the hotbar
         for (row in 0 until PLAYER_INVENTORY_COLUMN_COUNT) {

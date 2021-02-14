@@ -45,6 +45,14 @@ class BaseChestTileEntity(
         chestUpgrades.addListener { updateRowCount() }
     }
 
+    fun isConfigurableUpgradeSlot(slot: Int): Boolean {
+        val stack = chestUpgrades.getStackInSlot(slot)
+        if (stack.isEmpty) {
+            return false
+        }
+        return ItemRegistry.configurableUpgrades.any { it.get() == stack.item }
+    }
+
     private fun updateRowCount() {
         val capacityUpgrades = chestUpgrades.getContents().count { it.item == ItemRegistry.capacityUpgrade.get() }
         val newRows = 3 + capacityUpgrades

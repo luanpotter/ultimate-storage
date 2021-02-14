@@ -37,7 +37,7 @@ class ModRecipeProvider(generator: DataGenerator) : RecipeProvider(generator) {
             .build(consumer)
 
         ShapedRecipeBuilder
-            .shapedRecipe(BlockRegistry.forTier(Tier.IRON).block())
+            .shapedRecipe(BlockRegistry.forTier(Tier.GOLD).block())
             .patternLine("GGG")
             .patternLine("GCG")
             .patternLine("GGG")
@@ -89,6 +89,17 @@ class ModRecipeProvider(generator: DataGenerator) : RecipeProvider(generator) {
             .key('C', Items.CHEST)
             .key('S', ItemTags.SLABS)
             .key('H', Items.HOPPER)
+            .key('U', ItemRegistry.baseUpgrade.get())
+            .addCriterion("has_upgrades", hasItem(ItemRegistry.baseUpgrade.get()))
+            .build(consumer)
+
+        ShapedRecipeBuilder
+            .shapedRecipe(ItemRegistry.filterUpgrade.get())
+            .patternLine(" R ")
+            .patternLine("PUP")
+            .patternLine(" R ")
+            .key('R', Items.REDSTONE)
+            .key('P', Items.PAPER)
             .key('U', ItemRegistry.baseUpgrade.get())
             .addCriterion("has_upgrades", hasItem(ItemRegistry.baseUpgrade.get()))
             .build(consumer)

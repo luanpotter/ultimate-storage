@@ -28,4 +28,5 @@ object ItemRegistry {
     val filterUpgrade = addItem("filter_upgrade") { Item(Item.Properties().group(itemGroup)) }
 
     val allUpgrades = listOf(capacityUpgrade, filterUpgrade)
+    val configurableUpgrades = listOf(filterUpgrade)
 }

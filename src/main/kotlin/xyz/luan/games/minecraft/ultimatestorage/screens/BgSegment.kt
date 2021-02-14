@@ -18,12 +18,12 @@ class BgSegment private constructor(
     )
 
     companion object {
-        val top = BgSegment(y = 126, height = 7)
+        val top = BgSegment(y = 134, height = 7)
         val row = BgSegment(y = 88, height = 18)
-        val emptyRow = BgSegment(y = 107, height = 18, slots = generateSlots(y = 0, xStart = 11, xDelta = 18, n = 9))
+        val emptyRow = BgSegment(y = 107, height = 26, slots = generateSlots(y = 0, xStart = 11, xDelta = 18, n = 9))
         val bottom = BgSegment(y = 0, height = 87)
-        val upgrades = BgSegment(y = 171, height = 36, slots = generateSlots(y = 14, xStart = 13, xDelta = 20, n = 8))
-        val upgradesEmpty = BgSegment(y = 134, height = 36)
+        val upgrades = BgSegment(y = 179, height = 36, slots = generateSlots(y = 14, xStart = 13, xDelta = 20, n = 8))
+        val upgradesEmpty = BgSegment(y = 142, height = 36)
 
         val baseUpgradeOverlay = BgSegment(x = 238, y = 0, width = 18, height = 18)
     }
