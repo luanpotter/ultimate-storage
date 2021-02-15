@@ -2,8 +2,13 @@ package xyz.luan.games.minecraft.ultimatestorage.screens
 
 import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.item.Item
+import net.minecraft.item.Items
 import net.minecraft.util.text.ITextComponent
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestUpgradesContainer
+import xyz.luan.games.minecraft.ultimatestorage.items.ItemFilter
+import xyz.luan.games.minecraft.ultimatestorage.items.ItemFilterUpgrade.Companion.getItemFilterData
+import xyz.luan.games.minecraft.ultimatestorage.items.ItemFilterUpgrade.Companion.setItemFilterData
 
 class BaseChestUpgradeScreen(
     container: BaseChestUpgradesContainer,
@@ -36,10 +41,16 @@ class BaseChestUpgradeScreen(
             }
             render(BgSegment.emptyRow, renderSlotOverlay = BgSegment.baseUpgradeOverlay, amount = slotCount)
             if (selectedTab == -1) {
-                text("Select an upgrade to configure", dx = 18, dy = 2)
+                text("Select an upgrade to configure", dx = 16, dy = 0)
             } else {
-                val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab).item
-                text("Configure ${upgrade.name.string}", dx = 18, dy = 2)
+                val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
+                val filters = getItemFilterData(upgrade)
+
+                filters.forEachIndexed { idx, filter ->
+                    drawItem(filter.item(), 20 * idx, 0)
+                }
+                println(filters)
+                text("Configure ${upgrade.item.name.string} - ${filters.size}", dx = 16, dy = 0)
             }
             render(BgSegment.upgradesEmpty)
             render(BgSegment.bottom)
@@ -65,6 +76,10 @@ class BaseChestUpgradeScreen(
 
     private fun clickButton(slot: Int) {
         selectedTab = slot
+
+        val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
+        setItemFilterData(upgrade, listOf(ItemFilter(Item.getIdFromItem(Items.PAPER), 12)))
+
         reset()
     }
 

@@ -5,6 +5,8 @@ import net.minecraft.client.gui.screen.inventory.ContainerScreen
 import net.minecraft.client.gui.widget.button.Button
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.container.Container
+import net.minecraft.item.Item
+import net.minecraft.item.ItemStack
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TranslationTextComponent
@@ -17,6 +19,11 @@ abstract class BaseScreen<T : Container>(
     playerInventory: PlayerInventory,
     title: ITextComponent,
 ) : ContainerScreen<T>(container, playerInventory, title) {
+
+    override fun render(matrixStack: MatrixStack, mouseX: Int, mouseY: Int, partialTicks: Float) {
+        super.render(matrixStack, mouseX, mouseY, partialTicks)
+        renderHoveredTooltip(matrixStack, mouseX, mouseY)
+    }
 
     private inner class BgRenderer(
         private val x: Int,
@@ -60,12 +67,23 @@ abstract class BaseScreen<T : Container>(
         }
     }
 
+    private inner class ItemRenderer(
+        private val x: Int,
+        private val y: Int,
+        private val item: Item,
+    ) {
+        fun render() {
+            itemRenderer.renderItemAndEffectIntoGUI(ItemStack(item), x, y)
+        }
+    }
+
     protected inner class Renderer {
         var relativeY = 0
 
         private var bgRenderers = mutableListOf<BgRenderer>()
         private var fgRenderers = mutableListOf<FgRenderer>()
         private val buttons = mutableListOf<ButtonRenderer>()
+        private val items = mutableListOf<ItemRenderer>()
 
         fun prepare(block: Renderer.() -> Unit) {
             clear()
@@ -77,12 +95,17 @@ abstract class BaseScreen<T : Container>(
             bgRenderers.clear()
             fgRenderers.clear()
             buttons.clear()
+            items.clear()
         }
 
         fun text(text: String, dx: Int, dy: Int) {
             val x = dx.toFloat()
             val y = relativeY + dy.toFloat() + getMinecraft().fontRenderer.FONT_HEIGHT
             fgRenderers.add(FgRenderer(x, y, text))
+        }
+
+        fun drawItem(item: Item, dx: Int, dy: Int) {
+            items.add(ItemRenderer(guiLeft + dx, guiTop + relativeY + dy, item))
         }
 
         fun skip(segment: BgSegment) {
@@ -106,6 +129,7 @@ abstract class BaseScreen<T : Container>(
 
         fun renderBackground(matrixStack: MatrixStack) {
             bgRenderers.forEach { it.render(matrixStack) }
+            items.forEach { it.render() }
         }
 
         fun renderForeground(matrixStack: MatrixStack) {
