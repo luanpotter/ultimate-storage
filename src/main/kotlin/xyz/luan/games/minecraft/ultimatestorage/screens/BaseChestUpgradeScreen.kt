@@ -22,7 +22,11 @@ class BaseChestUpgradeScreen(
         super.init()
 
         selectedTab = -1
-        container.tile.chestUpgrades.addListener { updateGui() }
+        container.tile.chestUpgrades.addListener { reset() }
+        reset()
+    }
+
+    private fun reset() {
         renderer.prepare {
             render(BgSegment.top)
             val slotCount = container.tile.tier.upgradeSlots
@@ -31,14 +35,19 @@ class BaseChestUpgradeScreen(
                 button(slot.x, slot.y + 18, 18, 8, "ˬ") { clickButton(idx) }
             }
             render(BgSegment.emptyRow, renderSlotOverlay = BgSegment.baseUpgradeOverlay, amount = slotCount)
-            text("Select an upgrade to configure", dx = 18, dy = 2)
+            if (selectedTab == -1) {
+                text("Select an upgrade to configure", dx = 18, dy = 2)
+            } else {
+                val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab).item
+                text("Configure ${upgrade.name.string}", dx = 18, dy = 2)
+            }
             render(BgSegment.upgradesEmpty)
             render(BgSegment.bottom)
         }
-        renderer.initButtons()
-    }
 
-    private fun updateGui() {
+        buttons.clear()
+        renderer.initButtons()
+
         val slotCount = container.tile.tier.upgradeSlots
         val validTabs = (0 until slotCount).filter { idx ->
             val valid = container.tile.isConfigurableUpgradeSlot(idx)
@@ -56,7 +65,7 @@ class BaseChestUpgradeScreen(
 
     private fun clickButton(slot: Int) {
         selectedTab = slot
-        updateGui()
+        reset()
     }
 
     override fun drawGuiContainerForegroundLayer(matrixStack: MatrixStack, x: Int, y: Int) {

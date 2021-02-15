@@ -76,6 +76,7 @@ abstract class BaseScreen<T : Container>(
             relativeY = 0
             bgRenderers.clear()
             fgRenderers.clear()
+            buttons.clear()
         }
 
         fun text(text: String, dx: Int, dy: Int) {
