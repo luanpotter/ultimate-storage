@@ -43,7 +43,6 @@ object UltimateStorageMod {
         EVENT_BUS.register(this)
         MOD_BUS.addListener(::onClientSetup)
 
-
         MAIN_CHANNEL.messageBuilder(
             StorageUpdatePacket::class.java,
             0,
