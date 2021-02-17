@@ -1,6 +1,7 @@
 package xyz.luan.games.minecraft.ultimatestorage.screens
 
 import com.mojang.blaze3d.matrix.MatrixStack
+import net.minecraft.client.renderer.Rectangle2d
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.Item
 import net.minecraft.item.Items
@@ -22,6 +23,13 @@ class BaseChestUpgradeScreen(
 
     private val renderer = Renderer()
     private var selectedTab = -1
+    private val selectables = mutableListOf<Selectable>()
+    private var currentSelected: Selectable? = null
+
+    inner class Selectable(
+        val rect: Rectangle2d,
+        val onClick: () -> Boolean,
+    )
 
     override fun init() {
         super.init()
@@ -29,6 +37,18 @@ class BaseChestUpgradeScreen(
         selectedTab = -1
         container.tile.chestUpgrades.addListener { reset() }
         reset()
+    }
+
+    override fun mouseMoved(x: Double, y: Double) {
+        super.mouseMoved(x, y)
+        currentSelected = selectables.find { it.rect.contains(x.toInt(), y.toInt()) }
+    }
+
+    override fun mouseClicked(x: Double, y: Double, button: Int): Boolean {
+        if (currentSelected?.let { it.onClick() } == true) {
+            return true
+        }
+        return super.mouseClicked(x, y, button)
     }
 
     private fun reset() {
@@ -41,18 +61,35 @@ class BaseChestUpgradeScreen(
             }
             render(BgSegment.emptyRow, renderSlotOverlay = BgSegment.baseUpgradeOverlay, amount = slotCount)
             if (selectedTab == -1) {
-                text("Select an upgrade to configure", dx = 16, dy = 0)
-            } else {
-                val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
-                val filters = getItemFilterData(upgrade)
-
-                filters.forEachIndexed { idx, filter ->
-                    drawItem(filter.item(), 20 * idx, 0)
+                render(BgSegment.upgradesEmpty) {
+                    text("Select an upgrade to configure", dx = 12, dy = 0)
                 }
-                println(filters)
-                text("Configure ${upgrade.item.name.string} - ${filters.size}", dx = 16, dy = 0)
+            } else {
+                render(BgSegment.upgrades) {
+                    val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
+                    val filters = getItemFilterData(upgrade)
+
+                    val dx = 12
+                    val dy = 14
+                    val delta = 18
+                    text("Configure ${upgrade.item.name.string}", dx = dx, dy = 0)
+                    selectables.clear()
+                    val currentFilters = filters.mapIndexed { idx, filter ->
+                        drawItem(filter.item(), dx + delta * idx + 1, dy + 1)
+                        val rect = renderAt(BgSegment.removeOverlay, dx + delta * idx, dy)
+                        Selectable(rect, onClick = {
+                            setItemFilterData(upgrade, filters.filter { it != filter })
+                            reset()
+                            true
+                        })
+                    }
+                    selectables.addAll(currentFilters)
+                    val addNewButton = renderAt(BgSegment.plusButton, dx + delta * filters.size, dy)
+                    selectables.add(
+                        Selectable(addNewButton, onClick = { false })
+                    )
+                }
             }
-            render(BgSegment.upgradesEmpty)
             render(BgSegment.bottom)
         }
 
@@ -78,7 +115,16 @@ class BaseChestUpgradeScreen(
         selectedTab = slot
 
         val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
-        setItemFilterData(upgrade, listOf(ItemFilter(Item.getIdFromItem(Items.PAPER), 12)))
+        if (getItemFilterData(upgrade).isEmpty()) {
+            setItemFilterData(
+                upgrade,
+                listOf(
+                    ItemFilter(Item.getIdFromItem(Items.PAPER), 12),
+                    ItemFilter(Item.getIdFromItem(Items.BIRCH_BOAT), 2),
+                    ItemFilter(Item.getIdFromItem(Items.SLIME_BALL), 200),
+                ),
+            )
+        }
 
         reset()
     }
@@ -89,5 +135,8 @@ class BaseChestUpgradeScreen(
 
     override fun drawGuiContainerBackgroundLayer(matrixStack: MatrixStack, partialTicks: Float, x: Int, y: Int) {
         renderer.renderBackground(matrixStack)
+        currentSelected?.let {
+            BgSegment.hoverOverlay.render(this, matrixStack, it.rect.x, it.rect.y)
+        }
     }
 }

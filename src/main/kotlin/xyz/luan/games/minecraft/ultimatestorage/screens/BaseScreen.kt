@@ -3,11 +3,11 @@ package xyz.luan.games.minecraft.ultimatestorage.screens
 import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.client.gui.screen.inventory.ContainerScreen
 import net.minecraft.client.gui.widget.button.Button
+import net.minecraft.client.renderer.Rectangle2d
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.container.Container
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
-import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TranslationTextComponent
 import java.awt.Color
@@ -31,16 +31,7 @@ abstract class BaseScreen<T : Container>(
         private val segment: BgSegment,
     ) {
         fun render(matrixStack: MatrixStack) {
-            bindTexture(segment.texture)
-            segment.render(matrixStack, x, y)
-        }
-
-        private fun BgSegment.render(matrixStack: MatrixStack, dx: Int, dy: Int) {
-            blit(matrixStack, dx, dy, this.x, this.y, width, height)
-        }
-
-        private fun bindTexture(texture: ResourceLocation) {
-            getMinecraft().textureManager.bindTexture(texture)
+            segment.render(this@BaseScreen, matrixStack, x, y)
         }
     }
 
@@ -78,7 +69,7 @@ abstract class BaseScreen<T : Container>(
     }
 
     protected inner class Renderer {
-        var relativeY = 0
+        private var relativeY = 0
 
         private var bgRenderers = mutableListOf<BgRenderer>()
         private var fgRenderers = mutableListOf<FgRenderer>()
@@ -100,7 +91,7 @@ abstract class BaseScreen<T : Container>(
 
         fun text(text: String, dx: Int, dy: Int) {
             val x = dx.toFloat()
-            val y = relativeY + dy.toFloat() + getMinecraft().fontRenderer.FONT_HEIGHT
+            val y = relativeY + dy.toFloat() + getMinecraft().fontRenderer.FONT_HEIGHT / 2
             fgRenderers.add(FgRenderer(x, y, text))
         }
 
@@ -112,7 +103,12 @@ abstract class BaseScreen<T : Container>(
             relativeY += segment.height
         }
 
-        fun render(segment: BgSegment, renderSlotOverlay: BgSegment? = null, amount: Int = 0) {
+        fun render(
+            segment: BgSegment,
+            renderSlotOverlay: BgSegment? = null,
+            amount: Int = 0,
+            lambda: Renderer.() -> Unit = {},
+        ) {
             bgRenderers.add(BgRenderer(guiLeft, guiTop + relativeY, segment))
             if (renderSlotOverlay != null) {
                 val slots = segment.slots.take(amount).map {
@@ -120,7 +116,15 @@ abstract class BaseScreen<T : Container>(
                 }
                 bgRenderers.addAll(slots)
             }
+            lambda()
             skip(segment)
+        }
+
+        fun renderAt(segment: BgSegment, x: Int, y: Int): Rectangle2d {
+            val screenX = guiLeft + x
+            val screenY = guiTop + relativeY + y
+            bgRenderers.add(BgRenderer(screenX, screenY, segment))
+            return Rectangle2d(screenX, screenY, segment.width, segment.height)
         }
 
         fun button(x: Int, y: Int, w: Int, h: Int, text: String, action: (Button) -> Unit) {

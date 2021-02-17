@@ -1,5 +1,6 @@
 package xyz.luan.games.minecraft.ultimatestorage.screens
 
+import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.util.ResourceLocation
 import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod
 
@@ -17,6 +18,11 @@ class BgSegment private constructor(
         val y: Int,
     )
 
+    fun render(gui: BaseScreen<*>, matrixStack: MatrixStack, dx: Int, dy: Int) {
+        gui.minecraft.textureManager.bindTexture(texture)
+        gui.blit(matrixStack, dx, dy, this.x, this.y, width, height)
+    }
+
     companion object {
         val top = BgSegment(y = 134, height = 7)
         val row = BgSegment(y = 88, height = 18)
@@ -26,6 +32,9 @@ class BgSegment private constructor(
         val upgradesEmpty = BgSegment(y = 142, height = 36)
 
         val baseUpgradeOverlay = BgSegment(x = 238, y = 0, width = 18, height = 18)
+        val plusButton = BgSegment(x = 238, y = 18, width = 18, height = 18)
+        val removeOverlay = BgSegment(x = 238, y = 36, width = 18, height = 18)
+        val hoverOverlay = BgSegment(x = 238, y = 54, width = 18, height = 18)
     }
 }
 
