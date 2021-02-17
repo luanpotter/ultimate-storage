@@ -79,6 +79,7 @@ class BaseChestUpgradeScreen(
                         val rect = renderAt(BgSegment.removeOverlay, dx + delta * idx, dy)
                         Selectable(rect, onClick = {
                             setItemFilterData(upgrade, filters.filter { it != filter })
+                            StorageUpdatePacket.send(container.tile.pos, selectedTab, upgrade)
                             reset()
                             true
                         })
@@ -124,6 +125,7 @@ class BaseChestUpgradeScreen(
                     ItemFilter(Item.getIdFromItem(Items.SLIME_BALL), 200),
                 ),
             )
+            StorageUpdatePacket.send(container.tile.pos, selectedTab, upgrade)
         }
 
         reset()

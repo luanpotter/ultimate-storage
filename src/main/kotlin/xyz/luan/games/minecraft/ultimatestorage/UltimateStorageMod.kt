@@ -28,7 +28,7 @@ object UltimateStorageMod {
 
     val LOGGER: Logger = LogManager.getLogger()
 
-    private val MAIN_CHANNEL = NetworkRegistry.newSimpleChannel(
+    val MAIN_CHANNEL = NetworkRegistry.newSimpleChannel(
         ResourceLocation(MOD_ID, "main"),
         { PROTOCOL_VERSION },
         { PROTOCOL_VERSION == it },
@@ -49,9 +49,9 @@ object UltimateStorageMod {
             0,
             NetworkDirection.PLAY_TO_SERVER,
         )
-            .encoder { _, bytes -> StorageUpdatePacket.encode(bytes) }
+            .encoder { msg, bytes -> msg.encode(bytes) }
             .decoder { StorageUpdatePacket.decode(it) }
-            .consumer(BiConsumer { msg, _ -> StorageUpdatePacket.consume(msg) })
+            .consumer(BiConsumer { msg, ctx -> StorageUpdatePacket.consume(msg, ctx.get()) })
             .add()
     }
 
