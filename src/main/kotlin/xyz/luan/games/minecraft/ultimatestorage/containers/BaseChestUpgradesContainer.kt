@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketBuffer
 import xyz.luan.games.minecraft.ultimatestorage.registry.BlockRegistry
 import xyz.luan.games.minecraft.ultimatestorage.registry.ItemRegistry
+import xyz.luan.games.minecraft.ultimatestorage.screens.BaseChestUpgradeScreen.Companion.UPGRADE_ROW_HEIGHT
 import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment
 import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 
@@ -30,22 +31,11 @@ class BaseChestUpgradesContainer constructor(
     )
 
     private fun setup(inventory: PlayerInventory) {
-        val firstBlock = 8
-        val secondBlock = firstBlock + BgSegment.upgrades.height + BgSegment.emptyRow.height + 4
-        val thirdBlock = secondBlock + 4 + PLAYER_INVENTORY_ROW_COUNT * 18
-        // Slots for the hotbar
-        for (row in 0 until PLAYER_INVENTORY_COLUMN_COUNT) {
-            val x = 12 + row * 18
-            addSlot(Slot(inventory, row, x, thirdBlock))
-        }
-        // Slots for the main inventory
-        for (row in 0 until PLAYER_INVENTORY_ROW_COUNT) {
-            for (col in 0 until PLAYER_INVENTORY_COLUMN_COUNT) {
-                val x = 12 + col * 18
-                val y = secondBlock + row * 18
-                addSlot(Slot(inventory, col + (row + 1) * 9, x, y))
-            }
-        }
+        val firstBlock = BgSegment.top.height + 1
+        val secondBlock = firstBlock + BgSegment.row.height + BgSegment.divider.height + UPGRADE_ROW_HEIGHT
+
+        addPlayerInventorySlots(inventory, secondBlock)
+
         // main upgrade gui
         for (idx in 0 until tile.chestUpgrades.sizeInventory) {
             addSlot(UpgradeSlot(tile.chestUpgrades, idx, 12 + idx * 18, firstBlock))

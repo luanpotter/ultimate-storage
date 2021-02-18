@@ -13,23 +13,21 @@ class BaseChestScreen(
     private val rows: Int
         get() = container.rows
 
-    init {
-        xSize = 184
-        ySize = BgSegment.top.height + rows * BgSegment.row.height + BgSegment.bottom.height
-    }
-
     private val renderer = Renderer()
 
     override fun init() {
-        super.init()
-
         renderer.prepare {
             render(BgSegment.top)
             repeat(rows) {
                 render(BgSegment.row)
             }
-            render(BgSegment.bottom)
+            renderPlayerInventory()
         }
+
+        xSize = renderer.getWidth()
+        ySize = renderer.getHeight()
+
+        super.init()
     }
 
     override fun drawGuiContainerForegroundLayer(matrixStack: MatrixStack, x: Int, y: Int) {

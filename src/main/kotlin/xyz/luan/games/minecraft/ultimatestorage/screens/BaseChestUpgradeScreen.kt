@@ -16,10 +16,6 @@ class BaseChestUpgradeScreen(
     playerInventory: PlayerInventory,
     title: ITextComponent,
 ) : BaseScreen<BaseChestUpgradesContainer>(container, playerInventory, title) {
-    init {
-        xSize = 184
-        ySize = BgSegment.top.height + BgSegment.row.height + BgSegment.upgrades.height + BgSegment.bottom.height
-    }
 
     private val renderer = Renderer()
     private var selectedTab = -1
@@ -27,21 +23,24 @@ class BaseChestUpgradeScreen(
     private var currentSelected: Selectable? = null
 
     inner class Selectable(
+        // note: this is on relative coordinates!
         val rect: Rectangle2d,
         val onClick: () -> Boolean,
     )
 
     override fun init() {
+        selectedTab = -1
+        reset()
         super.init()
 
-        selectedTab = -1
         container.tile.chestUpgrades.addListener { reset() }
-        reset()
     }
 
     override fun mouseMoved(x: Double, y: Double) {
         super.mouseMoved(x, y)
-        currentSelected = selectables.find { it.rect.contains(x.toInt(), y.toInt()) }
+        val relativeX = x.toInt() - guiLeft
+        val relativeY = y.toInt() - guiTop
+        currentSelected = selectables.find { it.rect.contains(relativeX, relativeY) }
     }
 
     override fun mouseClicked(x: Double, y: Double, button: Int): Boolean {
@@ -54,18 +53,19 @@ class BaseChestUpgradeScreen(
     private fun reset() {
         renderer.prepare {
             render(BgSegment.top)
+
             val slotCount = container.tile.tier.upgradeSlots
-            val slots = BgSegment.emptyRow.slots.take(slotCount)
+            val slots = BgSegment.row.slots.take(slotCount)
             slots.forEachIndexed { idx, slot ->
                 button(slot.x, slot.y + 18, 18, 8, "ˬ") { clickButton(idx) }
             }
             render(BgSegment.emptyRow, renderSlotOverlay = BgSegment.baseUpgradeOverlay, amount = slotCount)
             if (selectedTab == -1) {
-                render(BgSegment.upgradesEmpty) {
+                renderUpgradeSection(locked = true, height = UPGRADE_ROW_HEIGHT) {
                     text("Select an upgrade to configure", dx = 12, dy = 0)
                 }
             } else {
-                render(BgSegment.upgrades) {
+                renderUpgradeSection(locked = false, height = UPGRADE_ROW_HEIGHT) {
                     val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
                     val filters = getItemFilterData(upgrade)
 
@@ -91,8 +91,11 @@ class BaseChestUpgradeScreen(
                     )
                 }
             }
-            render(BgSegment.bottom)
+            renderPlayerInventory()
         }
+
+        xSize = renderer.getWidth()
+        ySize = renderer.getHeight()
 
         buttons.clear()
         renderer.initButtons()
@@ -138,7 +141,11 @@ class BaseChestUpgradeScreen(
     override fun drawGuiContainerBackgroundLayer(matrixStack: MatrixStack, partialTicks: Float, x: Int, y: Int) {
         renderer.renderBackground(matrixStack)
         currentSelected?.let {
-            BgSegment.hoverOverlay.render(this, matrixStack, it.rect.x, it.rect.y)
+            BgSegment.hoverOverlay.render(this, matrixStack, guiLeft + it.rect.x, guiTop + it.rect.y)
         }
+    }
+
+    companion object {
+        const val UPGRADE_ROW_HEIGHT = 36
     }
 }

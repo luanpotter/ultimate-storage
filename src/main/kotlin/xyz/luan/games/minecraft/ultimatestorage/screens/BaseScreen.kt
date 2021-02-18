@@ -10,6 +10,14 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TranslationTextComponent
+import xyz.luan.games.minecraft.ultimatestorage.containers.PLAYER_INVENTORY_ROW_COUNT
+import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment.Companion.DEFAULT_WIDTH
+import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment.Companion.closedUpgradeBottom
+import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment.Companion.closedUpgradeMiddle
+import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment.Companion.closedUpgradeTop
+import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment.Companion.openedUpgradeBottom
+import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment.Companion.openedUpgradeMiddle
+import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment.Companion.openedUpgradeTop
 import java.awt.Color
 
 val textColor = Color(55, 55, 55).rgb
@@ -29,9 +37,10 @@ abstract class BaseScreen<T : Container>(
         private val x: Int,
         private val y: Int,
         private val segment: BgSegment,
+        private val heightOverride: Int? = null,
     ) {
         fun render(matrixStack: MatrixStack) {
-            segment.render(this@BaseScreen, matrixStack, x, y)
+            segment.render(this@BaseScreen, matrixStack, guiLeft + x, guiTop + y, heightOverride = heightOverride)
         }
     }
 
@@ -41,6 +50,7 @@ abstract class BaseScreen<T : Container>(
         private val text: String,
     ) {
         fun render(matrixStack: MatrixStack) {
+            // font rendering is already relative to guiLeft and guiTop apparently
             getMinecraft().fontRenderer.drawString(matrixStack, text, x, y, textColor)
         }
     }
@@ -54,7 +64,7 @@ abstract class BaseScreen<T : Container>(
         private val action: (Button) -> Unit,
     ) {
         fun add() {
-            addButton(Button(x, y, w, h, TranslationTextComponent(text), action))
+            addButton(Button(guiLeft + x, guiTop + y, w, h, TranslationTextComponent(text), action))
         }
     }
 
@@ -64,7 +74,7 @@ abstract class BaseScreen<T : Container>(
         private val item: Item,
     ) {
         fun render() {
-            itemRenderer.renderItemAndEffectIntoGUI(ItemStack(item), x, y)
+            itemRenderer.renderItemAndEffectIntoGUI(ItemStack(item), guiLeft + x, guiTop + y)
         }
     }
 
@@ -75,6 +85,14 @@ abstract class BaseScreen<T : Container>(
         private var fgRenderers = mutableListOf<FgRenderer>()
         private val buttons = mutableListOf<ButtonRenderer>()
         private val items = mutableListOf<ItemRenderer>()
+
+        fun getWidth(): Int {
+            return DEFAULT_WIDTH
+        }
+
+        fun getHeight(): Int {
+            return relativeY
+        }
 
         fun prepare(block: Renderer.() -> Unit) {
             clear()
@@ -96,11 +114,35 @@ abstract class BaseScreen<T : Container>(
         }
 
         fun drawItem(item: Item, dx: Int, dy: Int) {
-            items.add(ItemRenderer(guiLeft + dx, guiTop + relativeY + dy, item))
+            items.add(ItemRenderer(dx, relativeY + dy, item))
         }
 
         fun skip(segment: BgSegment) {
-            relativeY += segment.height
+            relativeY += segment.drawHeight
+        }
+
+        fun renderPlayerInventory() {
+            render(BgSegment.divider)
+            repeat(PLAYER_INVENTORY_ROW_COUNT) {
+                render(BgSegment.row)
+            }
+            render(BgSegment.divider)
+            render(BgSegment.row)
+            render(BgSegment.bottom)
+        }
+
+        fun renderUpgradeSection(locked: Boolean, height: Int, lambda: Renderer.() -> Unit) {
+            val top = if (locked) closedUpgradeTop else openedUpgradeTop
+            val middle = if (locked) closedUpgradeMiddle else openedUpgradeMiddle
+            val bottom = if (locked) closedUpgradeBottom else openedUpgradeBottom
+
+            val middleHeight = height - top.height - bottom.height
+            bgRenderers.add(BgRenderer(0, relativeY, top))
+            bgRenderers.add(BgRenderer(0, relativeY + top.height, middle, heightOverride = middleHeight))
+            bgRenderers.add(BgRenderer(0, relativeY + height - bottom.height, bottom))
+
+            lambda()
+            relativeY += height
         }
 
         fun render(
@@ -109,10 +151,10 @@ abstract class BaseScreen<T : Container>(
             amount: Int = 0,
             lambda: Renderer.() -> Unit = {},
         ) {
-            bgRenderers.add(BgRenderer(guiLeft, guiTop + relativeY, segment))
+            bgRenderers.add(BgRenderer(0, relativeY, segment))
             if (renderSlotOverlay != null) {
                 val slots = segment.slots.take(amount).map {
-                    BgRenderer(guiLeft + it.x, guiTop + relativeY + it.y, renderSlotOverlay)
+                    BgRenderer(it.x, relativeY + it.y, renderSlotOverlay)
                 }
                 bgRenderers.addAll(slots)
             }
@@ -121,14 +163,13 @@ abstract class BaseScreen<T : Container>(
         }
 
         fun renderAt(segment: BgSegment, x: Int, y: Int): Rectangle2d {
-            val screenX = guiLeft + x
-            val screenY = guiTop + relativeY + y
-            bgRenderers.add(BgRenderer(screenX, screenY, segment))
-            return Rectangle2d(screenX, screenY, segment.width, segment.height)
+            val relativeY = relativeY + y
+            bgRenderers.add(BgRenderer(x, relativeY, segment))
+            return Rectangle2d(x, relativeY, segment.width, segment.height)
         }
 
         fun button(x: Int, y: Int, w: Int, h: Int, text: String, action: (Button) -> Unit) {
-            buttons.add(ButtonRenderer(guiLeft + x, guiTop + relativeY + y, w, h, text, action))
+            buttons.add(ButtonRenderer(x, relativeY + y, w, h, text, action))
         }
 
         fun renderBackground(matrixStack: MatrixStack) {
