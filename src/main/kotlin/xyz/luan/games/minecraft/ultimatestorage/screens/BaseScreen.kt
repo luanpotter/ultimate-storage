@@ -9,7 +9,8 @@ import net.minecraft.inventory.container.Container
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.util.text.ITextComponent
-import net.minecraft.util.text.TranslationTextComponent
+import net.minecraft.util.text.StringTextComponent
+import net.minecraftforge.fml.client.gui.widget.ExtendedButton
 import xyz.luan.games.minecraft.ultimatestorage.containers.PLAYER_INVENTORY_ROW_COUNT
 import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment.Companion.DEFAULT_WIDTH
 import xyz.luan.games.minecraft.ultimatestorage.screens.BgSegment.Companion.closedUpgradeBottom
@@ -27,6 +28,27 @@ abstract class BaseScreen<T : Container>(
     playerInventory: PlayerInventory,
     title: ITextComponent,
 ) : ContainerScreen<T>(container, playerInventory, title) {
+
+    inner class UltimateButton(
+        x: Int,
+        y: Int,
+        w: Int,
+        h: Int,
+        text: String,
+        private val tooltip: String? = null,
+        action: (Button) -> Unit,
+    ) : ExtendedButton(x, y, w, h, StringTextComponent(text), action) {
+        override fun renderButton(mStack: MatrixStack, mouseX: Int, mouseY: Int, partial: Float) {
+            super.renderButton(mStack, mouseX, mouseY, partial)
+            if (visible && isHovered && active) {
+                renderToolTip(mStack, mouseX, mouseY)
+            }
+        }
+
+        override fun renderToolTip(matrixStack: MatrixStack, mouseX: Int, mouseY: Int) {
+            tooltip?.let { this@BaseScreen.renderTooltip(matrixStack, StringTextComponent(it), mouseX, mouseY) }
+        }
+    }
 
     override fun render(matrixStack: MatrixStack, mouseX: Int, mouseY: Int, partialTicks: Float) {
         super.render(matrixStack, mouseX, mouseY, partialTicks)
@@ -61,10 +83,11 @@ abstract class BaseScreen<T : Container>(
         private val w: Int,
         private val h: Int,
         private val text: String,
+        private val tooltip: String? = null,
         private val action: (Button) -> Unit,
     ) {
         fun add() {
-            addButton(Button(guiLeft + x, guiTop + y, w, h, TranslationTextComponent(text), action))
+            addButton(UltimateButton(guiLeft + x, guiTop + y, w, h, text, tooltip, action))
         }
     }
 
@@ -117,7 +140,7 @@ abstract class BaseScreen<T : Container>(
             items.add(ItemRenderer(dx, relativeY + dy, item))
         }
 
-        fun skip(segment: BgSegment) {
+        private fun skip(segment: BgSegment) {
             relativeY += segment.drawHeight
         }
 
@@ -168,8 +191,8 @@ abstract class BaseScreen<T : Container>(
             return Rectangle2d(x, relativeY, segment.width, segment.height)
         }
 
-        fun button(x: Int, y: Int, w: Int, h: Int, text: String, action: (Button) -> Unit) {
-            buttons.add(ButtonRenderer(x, relativeY + y, w, h, text, action))
+        fun button(x: Int, y: Int, w: Int, h: Int, text: String, tooltip: String? = null, action: (Button) -> Unit) {
+            buttons.add(ButtonRenderer(x, relativeY + y, w, h, text, tooltip, action))
         }
 
         fun renderBackground(matrixStack: MatrixStack) {

@@ -18,9 +18,16 @@ class BaseChestUpgradeScreen(
 ) : BaseScreen<BaseChestUpgradesContainer>(container, playerInventory, title) {
 
     private val renderer = Renderer()
+
     private var selectedTab = -1
+        set(value) {
+            field = value
+            newFilterItemTab = -1
+        }
+
     private val selectables = mutableListOf<Selectable>()
     private var currentSelected: Selectable? = null
+    private var newFilterItemTab = -1
 
     inner class Selectable(
         // note: this is on relative coordinates!
@@ -51,44 +58,88 @@ class BaseChestUpgradeScreen(
     }
 
     private fun reset() {
+        currentSelected = null
+
         renderer.prepare {
+            selectables.clear()
             render(BgSegment.top)
 
             val slotCount = container.tile.tier.upgradeSlots
-            val slots = BgSegment.row.slots.take(slotCount)
-            slots.forEachIndexed { idx, slot ->
-                button(slot.x, slot.y + 18, 18, 8, "ˬ") { clickButton(idx) }
-            }
             render(BgSegment.emptyRow, renderSlotOverlay = BgSegment.baseUpgradeOverlay, amount = slotCount)
-            if (selectedTab == -1) {
-                renderUpgradeSection(locked = true, height = UPGRADE_ROW_HEIGHT) {
-                    text("Select an upgrade to configure", dx = 12, dy = 0)
+            render(BgSegment.divider) {
+                val slots = BgSegment.row.slots.take(slotCount)
+                slots.forEachIndexed { idx, slot ->
+                    button(slot.x, slot.y, 18, 6, "", "Configure this upgrade") { clickButton(idx) }
                 }
-            } else {
-                renderUpgradeSection(locked = false, height = UPGRADE_ROW_HEIGHT) {
-                    val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
-                    val filters = getItemFilterData(upgrade)
+            }
+            when {
+                newFilterItemTab != -1 -> {
+                    val fullHeight = 76
+                    renderUpgradeSection(locked = false, height = fullHeight) {
+                        val dx = 12
+                        val dy = 4
+                        val height = 12
+                        listOf("Item", "Name", "Tag", "Mod", "Special").forEachIndexed { idx, name ->
+                            // TODO(luan) add tooltips
+                            button(dx, dy + (height + 2) * idx, 50, height, name, name) {
+                                newFilterItemTab = idx
+                                reset()
+                            }
+                        }
 
-                    val dx = 12
-                    val dy = 14
-                    val delta = 18
-                    text("Configure ${upgrade.item.name.string}", dx = dx, dy = 0)
-                    selectables.clear()
-                    val currentFilters = filters.mapIndexed { idx, filter ->
-                        drawItem(filter.item(), dx + delta * idx + 1, dy + 1)
-                        val rect = renderAt(BgSegment.removeOverlay, dx + delta * idx, dy)
-                        Selectable(rect, onClick = {
-                            setItemFilterData(upgrade, filters.filter { it != filter })
+                        val width = 40
+                        button(130, dy + (height + 2) * 0, width, height, "Save", "Save changes and go back") {
+                            val newFilter = ItemFilter(Item.getIdFromItem(Items.SLIME_BALL), 200)
+                            val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
+                            val filters = getItemFilterData(upgrade) + newFilter
+                            setItemFilterData(upgrade, filters)
                             StorageUpdatePacket.send(container.tile.pos, selectedTab, upgrade)
+                            newFilterItemTab = -1
                             reset()
-                            true
-                        })
+                        }
+                        button(130, dy + (height + 2) * 1, width, height, "Cancel", "Ignore changes and go back") {
+                            newFilterItemTab = -1
+                            reset()
+                        }
                     }
-                    selectables.addAll(currentFilters)
-                    val addNewButton = renderAt(BgSegment.plusButton, dx + delta * filters.size, dy)
-                    selectables.add(
-                        Selectable(addNewButton, onClick = { false })
-                    )
+                    container.setup(fullHeight)
+                }
+                selectedTab == -1 -> {
+                    renderUpgradeSection(locked = true, height = UPGRADE_ROW_HEIGHT) {
+                        text("Select an upgrade to configure", dx = 12, dy = 0)
+                    }
+                    container.setup(UPGRADE_ROW_HEIGHT)
+                }
+                else -> {
+                    renderUpgradeSection(locked = false, height = UPGRADE_ROW_HEIGHT) {
+                        val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
+                        val filters = getItemFilterData(upgrade)
+
+                        val dx = 12
+                        val dy = 14
+                        val delta = 18
+                        text("Configure ${upgrade.item.name.string}", dx = dx, dy = 0)
+                        val currentFilters = filters.mapIndexed { idx, filter ->
+                            drawItem(filter.item(), dx + delta * idx + 1, dy + 1)
+                            val rect = renderAt(BgSegment.removeOverlay, dx + delta * idx, dy)
+                            Selectable(rect, onClick = {
+                                setItemFilterData(upgrade, filters.filter { it !== filter })
+                                StorageUpdatePacket.send(container.tile.pos, selectedTab, upgrade)
+                                reset()
+                                true
+                            })
+                        }
+                        selectables.addAll(currentFilters)
+                        val addNewButton = renderAt(BgSegment.plusButton, dx + delta * filters.size, dy)
+                        selectables.add(
+                            Selectable(addNewButton, onClick = {
+                                newFilterItemTab = 0
+                                reset()
+                                true
+                            })
+                        )
+                    }
+                    container.setup(UPGRADE_ROW_HEIGHT)
                 }
             }
             renderPlayerInventory()
@@ -96,6 +147,8 @@ class BaseChestUpgradeScreen(
 
         xSize = renderer.getWidth()
         ySize = renderer.getHeight()
+        guiLeft = (width - xSize) / 2
+        guiTop = (height - ySize) / 2
 
         buttons.clear()
         renderer.initButtons()
@@ -107,6 +160,10 @@ class BaseChestUpgradeScreen(
             buttons[idx].visible = valid
             valid
         }
+        buttons.drop(slotCount).forEachIndexed { idx, button ->
+            button.active = newFilterItemTab != idx
+            button.visible = true
+        }
         if (selectedTab !in validTabs) {
             selectedTab = -1
         }
@@ -117,20 +174,6 @@ class BaseChestUpgradeScreen(
 
     private fun clickButton(slot: Int) {
         selectedTab = slot
-
-        val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
-        if (getItemFilterData(upgrade).isEmpty()) {
-            setItemFilterData(
-                upgrade,
-                listOf(
-                    ItemFilter(Item.getIdFromItem(Items.PAPER), 12),
-                    ItemFilter(Item.getIdFromItem(Items.BIRCH_BOAT), 2),
-                    ItemFilter(Item.getIdFromItem(Items.SLIME_BALL), 200),
-                ),
-            )
-            StorageUpdatePacket.send(container.tile.pos, selectedTab, upgrade)
-        }
-
         reset()
     }
 

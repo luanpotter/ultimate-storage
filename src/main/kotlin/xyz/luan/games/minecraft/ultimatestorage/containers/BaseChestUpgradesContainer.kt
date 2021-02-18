@@ -15,13 +15,13 @@ import xyz.luan.games.minecraft.ultimatestorage.tiles.BaseChestTileEntity
 class BaseChestUpgradesContainer constructor(
     windowId: Int,
     val tile: BaseChestTileEntity,
-    playerInventory: PlayerInventory,
+    private val playerInventory: PlayerInventory,
 ) : GenericContainer(BlockRegistry.baseChestUpgradesContainer.get(), windowId) {
     override val inventorySize
         get() = tile.chestUpgrades.sizeInventory
 
     init {
-        setup(playerInventory)
+        setup(UPGRADE_ROW_HEIGHT)
     }
 
     constructor(windowId: Int, playerInventory: PlayerInventory, extraData: PacketBuffer) : this(
@@ -30,11 +30,13 @@ class BaseChestUpgradesContainer constructor(
         playerInventory,
     )
 
-    private fun setup(inventory: PlayerInventory) {
-        val firstBlock = BgSegment.top.height + 1
-        val secondBlock = firstBlock + BgSegment.row.height + BgSegment.divider.height + UPGRADE_ROW_HEIGHT
+    fun setup(upgradeSectionHeight: Int) {
+        inventorySlots.clear()
 
-        addPlayerInventorySlots(inventory, secondBlock)
+        val firstBlock = BgSegment.top.height + 1
+        val secondBlock = firstBlock + BgSegment.row.height + 2 * BgSegment.divider.height + upgradeSectionHeight
+
+        addPlayerInventorySlots(playerInventory, secondBlock)
 
         // main upgrade gui
         for (idx in 0 until tile.chestUpgrades.sizeInventory) {
