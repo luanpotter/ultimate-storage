@@ -60,6 +60,7 @@ class BgSegment private constructor(
         val openedUpgradeBottom = BgSegment(y = 70, height = 5)
 
         // slots
+        val slot = BgSegment(x = 220, y = 0, width = 18, height = 18)
         val baseUpgradeOverlay = BgSegment(x = 238, y = 0, width = 18, height = 18)
         val plusButton = BgSegment(x = 238, y = 18, width = 18, height = 18)
         val removeOverlay = BgSegment(x = 238, y = 36, width = 18, height = 18)

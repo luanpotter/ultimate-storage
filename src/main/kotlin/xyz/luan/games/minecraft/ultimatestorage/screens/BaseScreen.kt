@@ -34,7 +34,7 @@ abstract class BaseScreen<T : Container>(
         y: Int,
         w: Int,
         h: Int,
-        text: String,
+        val text: String,
         private val tooltip: String? = null,
         action: (Button) -> Unit,
     ) : ExtendedButton(x, y, w, h, StringTextComponent(text), action) {

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.client.renderer.Rectangle2d
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.Item
-import net.minecraft.item.Items
 import net.minecraft.util.text.ITextComponent
 import xyz.luan.games.minecraft.ultimatestorage.containers.BaseChestUpgradesContainer
 import xyz.luan.games.minecraft.ultimatestorage.items.ItemFilter
@@ -28,6 +27,11 @@ class BaseChestUpgradeScreen(
     private val selectables = mutableListOf<Selectable>()
     private var currentSelected: Selectable? = null
     private var newFilterItemTab = -1
+        set(value) {
+            field = value
+            currentItemFilter = ItemFilter(-1, 0)
+        }
+    private var currentItemFilter = ItemFilter(-1, 0)
 
     inner class Selectable(
         // note: this is on relative coordinates!
@@ -57,6 +61,10 @@ class BaseChestUpgradeScreen(
         return super.mouseClicked(x, y, button)
     }
 
+    private fun canAddFilter(): Boolean {
+        return currentItemFilter.itemId != -1
+    }
+
     private fun reset() {
         currentSelected = null
 
@@ -80,7 +88,7 @@ class BaseChestUpgradeScreen(
                         val dy = 4
                         val height = 12
                         listOf("Item", "Name", "Tag", "Mod", "Special").forEachIndexed { idx, name ->
-                            // TODO(luan) add tooltips
+                            // TODO(luan) add better tooltips
                             button(dx, dy + (height + 2) * idx, 50, height, name, name) {
                                 newFilterItemTab = idx
                                 reset()
@@ -89,9 +97,8 @@ class BaseChestUpgradeScreen(
 
                         val width = 40
                         button(130, dy + (height + 2) * 0, width, height, "Save", "Save changes and go back") {
-                            val newFilter = ItemFilter(Item.getIdFromItem(Items.SLIME_BALL), 200)
                             val upgrade = container.tile.chestUpgrades.getStackInSlot(selectedTab)
-                            val filters = getItemFilterData(upgrade) + newFilter
+                            val filters = getItemFilterData(upgrade) + currentItemFilter
                             setItemFilterData(upgrade, filters)
                             StorageUpdatePacket.send(container.tile.pos, selectedTab, upgrade)
                             newFilterItemTab = -1
@@ -100,6 +107,23 @@ class BaseChestUpgradeScreen(
                         button(130, dy + (height + 2) * 1, width, height, "Cancel", "Ignore changes and go back") {
                             newFilterItemTab = -1
                             reset()
+                        }
+
+                        when (newFilterItemTab) {
+                            0 -> {
+                                val rect = renderAt(BgSegment.slot, 72, 4)
+                                drawItem(currentItemFilter.item(), 73, 5)
+                                selectables.add(Selectable(rect = rect, onClick = {
+                                    val selectedItem = playerInventory.itemStack.item
+                                    currentItemFilter = currentItemFilter.copy(
+                                        itemId = Item.getIdFromItem(selectedItem),
+                                        itemCount = 10, // TODO(luan) quantity picker
+                                    )
+                                    reset()
+                                    true
+                                }))
+                            }
+                            else -> text("-- WIP --", dx = 72, dy = 4)
                         }
                     }
                     container.setup(fullHeight)
@@ -161,8 +185,12 @@ class BaseChestUpgradeScreen(
             valid
         }
         buttons.drop(slotCount).forEachIndexed { idx, button ->
-            button.active = newFilterItemTab != idx
             button.visible = true
+            button.active = when {
+                idx <= 4 -> newFilterItemTab != idx
+                idx == 5 -> canAddFilter()
+                else -> true
+            }
         }
         if (selectedTab !in validTabs) {
             selectedTab = -1

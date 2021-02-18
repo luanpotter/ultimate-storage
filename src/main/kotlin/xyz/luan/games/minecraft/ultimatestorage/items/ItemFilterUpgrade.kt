@@ -13,8 +13,8 @@ import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod.itemGroup
 import xyz.luan.games.minecraft.ultimatestorage.toNBTList
 
 data class ItemFilter(
-    private val itemId: Int,
-    private val itemCount: Int,
+    val itemId: Int,
+    val itemCount: Int,
 ) {
     fun write(): CompoundNBT {
         return CompoundNBT().apply {
