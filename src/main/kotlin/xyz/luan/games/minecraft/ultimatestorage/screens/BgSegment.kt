@@ -1,6 +1,7 @@
 package xyz.luan.games.minecraft.ultimatestorage.screens
 
 import com.mojang.blaze3d.matrix.MatrixStack
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.util.ResourceLocation
 import xyz.luan.games.minecraft.ultimatestorage.UltimateStorageMod
 
@@ -11,14 +12,14 @@ class BgSegment private constructor(
     val height: Int,
     val slots: List<SlotPos> = listOf(),
 ) {
-    val texture by lazy { ResourceLocation(UltimateStorageMod.MOD_ID, "textures/gui/chest-gui.png") }
+    private val texture by lazy { ResourceLocation(UltimateStorageMod.MOD_ID, "textures/gui/chest-gui.png") }
 
     class SlotPos(
         val x: Int,
         val y: Int,
     )
 
-    fun render(gui: BaseScreen<*>, matrixStack: MatrixStack, dx: Int, dy: Int) {
+    fun render(gui: Screen, matrixStack: MatrixStack, dx: Int, dy: Int) {
         gui.minecraft.textureManager.bindTexture(texture)
         gui.blit(matrixStack, dx, dy, this.x, this.y, width, height)
     }
@@ -30,6 +31,7 @@ class BgSegment private constructor(
         val bottom = BgSegment(y = 0, height = 87)
         val upgrades = BgSegment(y = 179, height = 36, slots = generateSlots(y = 14, xStart = 13, xDelta = 20, n = 8))
         val upgradesEmpty = BgSegment(y = 142, height = 36)
+        val popup = BgSegment(y = 217, width = 115, height = 36)
 
         val baseUpgradeOverlay = BgSegment(x = 238, y = 0, width = 18, height = 18)
         val plusButton = BgSegment(x = 238, y = 18, width = 18, height = 18)
